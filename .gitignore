@@ -1,0 +1,138 @@
+# ============================================
+# AURA - .gitignore
+# ============================================
+
+# -------------------------------------------
+# ENVIRONMENT & SECRETS
+# -------------------------------------------
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# -------------------------------------------
+# FLUTTER / DART
+# -------------------------------------------
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+pubspec.lock
+build/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+.flutter-plugins-dependencies
+
+# -------------------------------------------
+# ANDROID
+# -------------------------------------------
+android/.gradle/
+android/app/debug/
+android/app/profile/
+android/app/release/
+android/local.properties
+android/key.properties
+android/*.jks
+android/*.keystore
+**/*.keystore
+**/*.jks
+android/captures/
+android/gradlew
+android/gradlew.bat
+android/gradle/
+android/.idea/
+android/*.iml
+
+# -------------------------------------------
+# IOS
+# -------------------------------------------
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Runner/GeneratedPluginRegistrant.*
+ios/**/*.mode1v3
+ios/**/*.mode2v3
+ios/**/*.moved-aside
+ios/**/*.pbxuser
+ios/**/*.perspectivev3
+ios/**/*sync/
+ios/**/.sconsign.dblite
+ios/**/.tags*
+ios/**/DerivedData/
+ios/Flutter/App.framework
+ios/Flutter/Generated.xcconfig
+
+# -------------------------------------------
+# WEB
+# -------------------------------------------
+web/favicon.png
+
+# -------------------------------------------
+# IDE
+# -------------------------------------------
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# -------------------------------------------
+# BUILD ARTIFACTS
+# -------------------------------------------
+*.apk
+*.aab
+*.ap_
+*.dex
+*.class
+*.log
+*.pyc
+*.o
+*.so
+*.dll
+
+# -------------------------------------------
+# OS FILES
+# -------------------------------------------
+.DS_Store
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.tmp
+*.temp
+
+# -------------------------------------------
+# MISCELLANEOUS
+# -------------------------------------------
+.metadata
+devtools_options.yaml
+.pub-cache/
+.pub/
+build/
+coverage/
+*.lcov
+*.map.json
+app.*.symbols
+app.*.map.json
+migrate_working_dir/
+kotlin_app/
+flutter_export_environment.sh
+
+# -------------------------------------------
+# KOMBAI / CANVAS
+# -------------------------------------------
+.kombai/
+
+# -------------------------------------------
+# TESTING
+# -------------------------------------------
+coverage/
+test/

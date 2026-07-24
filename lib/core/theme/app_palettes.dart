@@ -1,0 +1,68 @@
+import 'package:flutter/material.dart';
+import 'color_palette.dart';
+
+class AppPalettes {
+  AppPalettes._();
+
+  static const darkPalette = ColorPalette(
+    background: Color(0xFF080808),
+    backgroundElevated: Color(0xFF0F0F0F),
+    surface: Color(0xFF111111),
+    surfaceLight: Color(0xFF1B1B1B),
+    gold: Color(0xFFD4AF37),
+    goldLight: Color(0xFFF3D076),
+    goldDark: Color(0xFFB8860B),
+    textPrimary: Color(0xFFFFFFFF),
+    textSecondary: Color(0xFFB3B3B3),
+    textMuted: Color(0xFF888888),
+    textHint: Color(0xFF666666),
+    success: Color(0xFF00B894),
+    error: Color(0xFFFF6B6B),
+    warning: Color(0xFFFECA57),
+    amountColor: Color(0xFFFFFFFF),
+    categoryColor: Color(0xFFD4AF37),
+    tabInactiveBg: Color(0xFF1B1B1B),
+    tabInactiveText: Color(0xFF888888),
+    tabActiveBg: Color(0xFFD4AF37),
+    tabActiveText: Color(0xFF080808),
+    navArrowBg: Color(0xFF1B1B1B),
+    navArrowIcon: Color(0xFFD4AF37),
+    fabColor: Color(0xFFD4AF37),
+    cardIconBg: Color(0xFF0F0F0F),
+    cardIconColor: Color(0xFFD4AF37),
+    headerGradientStart: Color(0xFF080808),
+    headerGradientMiddle: Color(0xFF080808),
+    headerGradientEnd: Color(0xFF080808),
+  );
+
+  static const pastelPalette = ColorPalette(
+    background: Color(0xFFFFFAF5),
+    backgroundElevated: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surfaceLight: Color(0xFFF5EDE3),
+    gold: Color(0xFFE8B86D),
+    goldLight: Color(0xFFF5D89A),
+    goldDark: Color(0xFFD4A054),
+    textPrimary: Color(0xFF4A4A6A),
+    textSecondary: Color(0xFF7A7A9A),
+    textMuted: Color(0xFFA0A0B8),
+    textHint: Color(0xFFC0C0D0),
+    success: Color(0xFF7EC8A0),
+    error: Color(0xFFE88888),
+    warning: Color(0xFFF0D88A),
+    amountColor: Color(0xFF5B9E8F),
+    categoryColor: Color(0xFFE8937A),
+    tabInactiveBg: Color(0xFFE8E0F0),
+    tabInactiveText: Color(0xFF7A7A9A),
+    tabActiveBg: Color(0xFFD8CCE8),
+    tabActiveText: Color(0xFFFFFFFF),
+    navArrowBg: Color(0xFFD4EDDA),
+    navArrowIcon: Color(0xFF5B9E8F),
+    fabColor: Color(0xFFF5D89A),
+    cardIconBg: Color(0xFFFDE8E0),
+    cardIconColor: Color(0xFFE8B86D),
+    headerGradientStart: Color(0xFFD6EAF8),
+    headerGradientMiddle: Color(0xFFD4EDDA),
+    headerGradientEnd: Color(0xFFFDE8E0),
+  );
+}

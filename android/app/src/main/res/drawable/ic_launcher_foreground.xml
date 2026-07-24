@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Outer glow ring -->
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        <path
+            android:fillColor="#20D4AF37"
+            android:pathData="M0,-50 A50,50 0 1,1 0,50 A50,50 0 1,1 0,-50 Z" />
+    </group>
+
+    <!-- Gold ring -->
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        <path
+            android:fillColor="#10D4AF37"
+            android:pathData="M0,-40 A40,40 0 1,1 0,40 A40,40 0 1,1 0,-40 Z" />
+        <path
+            android:fillColor="#50D4AF37"
+            android:pathData="M0,-40 A40,40 0 1,1 0,40 A40,40 0 1,1 0,-40 Z"
+            android:strokeWidth="1.5"
+            android:strokeColor="#50D4AF37" />
+    </group>
+
+    <!-- Main gold circle -->
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        <path
+            android:fillColor="#FFD4AF37"
+            android:pathData="M0,-32 A32,32 0 1,1 0,32 A32,32 0 1,1 0,-32 Z" />
+        <path
+            android:fillColor="#33FFFFFF"
+            android:pathData="M0,-32 A32,32 0 1,1 0,32 A32,32 0 1,1 0,-32 Z"
+            android:strokeWidth="1"
+            android:strokeColor="#33FFFFFF" />
+    </group>
+
+    <!-- Inner glow -->
+    <group
+        android:translateX="54"
+        android:translateY="54">
+        <path
+            android:fillColor="#40FFFFFF"
+            android:pathData="M0,-10 A10,10 0 1,1 0,10 A10,10 0 1,1 0,-10 Z" />
+    </group>
+
+    <!-- Letter A - bold sans-serif style -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M46.5,68 L49.5,68 L54,52 L58.5,68 L61.5,68 L55.5,48 L52.5,48 Z
+                          M50.5,63 L57.5,63 L54,54.5 Z" />
+
+</vector>
