@@ -164,7 +164,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                     GestureDetector(
                       onTap: () => setState(() => _compartido = !_compartido),
                       child: Text(
-                        'Compartido con la otra persona',
+                        'Compartir',
                         style: GoogleFonts.dmSans(
                           fontSize: 13,
                           color: palette.textSecondary,

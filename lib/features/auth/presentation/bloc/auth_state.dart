@@ -31,9 +31,24 @@ class AuthUnauthenticated extends AuthState {
 
 class AuthError extends AuthState {
   final String message;
+  final bool isRegister;
+  final bool isPartnerError;
 
-  const AuthError({required this.message});
+  const AuthError({
+    required this.message,
+    this.isRegister = false,
+    this.isPartnerError = false,
+  });
 
   @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [message, isRegister, isPartnerError];
+}
+
+class AuthPartnerLinked extends AuthState {
+  final String partnerName;
+
+  const AuthPartnerLinked({required this.partnerName});
+
+  @override
+  List<Object?> get props => [partnerName];
 }

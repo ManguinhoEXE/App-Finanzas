@@ -29,16 +29,29 @@ class GastoRemoteDataSourceImpl implements GastoRemoteDataSource {
     return userId;
   }
 
+  Future<int?> _getPartnerId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(AppConstants.partnerIdKey);
+  }
+
   @override
   Future<List<GastoModel>> getGastos({String? startDate, String? endDate}) async {
     try {
       final userId = await _getCurrentUserId();
+      final partnerId = await _getPartnerId();
 
-      // Obtener gastos propios + compartidos
+      // Obtener gastos propios + compartidos del partner
       var query = _client
           .from('expenses')
-          .select('*, users!inner(name)')
-          .or('usuario.eq.$userId,compartido.eq.true');
+          .select('*, users!inner(name)');
+
+      if (partnerId != null) {
+        // Tiene partner: ver gastos propios + compartidos del partner
+        query = query.or('usuario.eq.$userId,and(compartido.eq.true,usuario.eq.$partnerId)');
+      } else {
+        // Sin partner: solo ver gastos propios
+        query = query.eq('usuario', userId);
+      }
 
       // Filtrado por fechas (opcional)
       if (startDate != null) {

@@ -6,6 +6,9 @@ import '../bloc/ahorro_event.dart';
 import '../bloc/ahorro_state.dart';
 import '../widgets/ahorro_card.dart';
 import '../widgets/create_ahorro_sheet.dart';
+import '../../../auth/presentation/widgets/friend_code_sheet.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
@@ -167,11 +170,45 @@ class _AhorrosPageState extends State<AhorrosPage> {
     );
   }
 
+
+
   Widget _buildModuleSwitch() {
     final palette = AppColors.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
+        GestureDetector(
+          onTap: () {
+            showModalBottomSheet(
+              context: context,
+              isScrollControlled: true,
+              backgroundColor: Colors.transparent,
+              builder: (_) => BlocProvider<AuthBloc>.value(
+                value: context.read<AuthBloc>(),
+                child: const FriendCodeSheet(),
+              ),
+            );
+          },
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            width: 28,
+            height: 52,
+            decoration: BoxDecoration(
+              color: palette.surface,
+              borderRadius: BorderRadius.circular(14),
+              border: Border.all(
+                color: palette.gold.withValues(alpha: 0.2),
+                width: 1,
+              ),
+            ),
+            child: Icon(
+              Icons.person_add,
+              color: palette.gold,
+              size: 16,
+            ),
+          ),
+        ),
+        const SizedBox(width: 12),
         Container(
           padding: const EdgeInsets.all(4),
           decoration: BoxDecoration(

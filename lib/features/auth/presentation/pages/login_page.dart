@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/login_form.dart';
+import 'register_page.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/slide_route_builder.dart';
 import '../../../../app/app.dart';
@@ -16,6 +17,11 @@ class LoginPage extends StatelessWidget {
     return Scaffold(
       backgroundColor: palette.background,
       body: BlocListener<AuthBloc, AuthState>(
+        listenWhen: (prev, curr) {
+          if (curr is AuthAuthenticated && prev is! AuthAuthenticated) return true;
+          if (curr is AuthError) return true;
+          return false;
+        },
         listener: (context, state) {
           if (state is AuthAuthenticated) {
             Navigator.of(context).pushAndRemoveUntil(
@@ -27,6 +33,8 @@ class LoginPage extends StatelessWidget {
               SnackBar(
                 content: Text(state.message),
                 backgroundColor: palette.error,
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
             );
           }
@@ -35,7 +43,16 @@ class LoginPage extends StatelessWidget {
           child: GestureDetector(
             onTap: () => FocusScope.of(context).unfocus(),
             behavior: HitTestBehavior.translucent,
-            child: const LoginForm(),
+            child: LoginForm(
+              onGoToRegister: () {
+                Navigator.of(context).pushReplacement(
+                  SlideRouteBuilder(
+                    page: const RegisterPage(),
+                    slideFromRight: true,
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

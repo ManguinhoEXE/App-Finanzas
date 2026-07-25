@@ -36,6 +36,11 @@ class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
     return userId;
   }
 
+  Future<int?> _getPartnerId() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getInt(AppConstants.partnerIdKey);
+  }
+
   Map<String, dynamic> _computeFields(Map<String, dynamic> json) {
     final targetAmount = double.tryParse(json['target_amount']?.toString() ?? '0') ?? 0;
     final currentAmount = double.tryParse(json['current_amount']?.toString() ?? '0') ?? 0;
@@ -53,12 +58,21 @@ class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
   Future<List<AhorroModel>> getAhorros() async {
     try {
       final userId = await _getCurrentUserId();
+      final partnerId = await _getPartnerId();
 
-      final data = await _client
+      var query = _client
           .from('saving_goals')
-          .select('*, users!inner(name)')
-          .or('owner.eq.$userId,is_shared.eq.true')
-          .order('created_at', ascending: false);
+          .select('*, users!inner(name)');
+
+      if (partnerId != null) {
+        // Tiene partner: ver metas propias + compartidas del partner
+        query = query.or('owner.eq.$userId,and(is_shared.eq.true,owner.eq.$partnerId)');
+      } else {
+        // Sin partner: solo ver metas propias
+        query = query.eq('owner', userId);
+      }
+
+      final data = await query.order('created_at', ascending: false);
 
       return data.map((json) {
         final ownerName = json['users']?['name'] ?? '';

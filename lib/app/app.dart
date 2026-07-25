@@ -68,7 +68,7 @@ class _AuthGateState extends State<_AuthGate> {
       listenWhen: (prev, curr) {
         if (curr is AuthAuthenticated && prev is! AuthAuthenticated) return true;
         if (curr is AuthUnauthenticated && prev is! AuthUnauthenticated) return true;
-        if (curr is AuthError) return true;
+        if (curr is AuthError && !curr.isPartnerError) return true;
         return false;
       },
       listener: (context, state) {
@@ -99,8 +99,14 @@ class _AuthGateState extends State<_AuthGate> {
           if (state is AuthAuthenticated) {
             return const HomePage();
           }
-          if (state is AuthUnauthenticated || state is AuthError) {
+          if (state is AuthUnauthenticated) {
             return const LoginPage();
+          }
+          if (state is AuthError && !state.isPartnerError) {
+            return const LoginPage();
+          }
+          if (state is AuthError && state.isPartnerError) {
+            return const HomePage();
           }
           return const SplashPage();
         },

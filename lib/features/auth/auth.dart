@@ -1,6 +1,9 @@
 export 'domain/entities/user.dart';
 export 'domain/repositories/auth_repository.dart';
-export 'domain/usecases/activate_key_usecase.dart';
+export 'domain/usecases/sign_up_usecase.dart';
+export 'domain/usecases/sign_in_usecase.dart';
+export 'domain/usecases/add_partner_usecase.dart';
+export 'domain/usecases/remove_partner_usecase.dart';
 export 'data/models/user_model.dart';
 export 'data/datasources/auth_remote_datasource.dart';
 export 'data/repositories/auth_repository_impl.dart';

@@ -4,26 +4,26 @@ import '../../../../core/usecases/usecase.dart';
 import '../entities/user.dart';
 import '../repositories/auth_repository.dart';
 
-class ActivateKeyUseCase implements UseCase<User, ActivateKeyParams> {
+class SignUpUseCase implements UseCase<User, SignUpParams> {
   final AuthRepository repository;
 
-  ActivateKeyUseCase(this.repository);
+  SignUpUseCase(this.repository);
 
   @override
-  Future<Either<Failure, User>> call(ActivateKeyParams params) async {
-    return await repository.activateKey(
-      key: params.key,
+  Future<Either<Failure, User>> call(SignUpParams params) async {
+    return await repository.signUp(
       name: params.name,
+      password: params.password,
     );
   }
 }
 
-class ActivateKeyParams {
-  final String key;
+class SignUpParams {
   final String name;
+  final String password;
 
-  const ActivateKeyParams({
-    required this.key,
+  const SignUpParams({
     required this.name,
+    required this.password,
   });
 }

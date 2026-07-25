@@ -8,32 +8,35 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/widgets/aura_logo.dart';
 
-class LoginForm extends StatefulWidget {
-  final VoidCallback onGoToRegister;
+class RegisterForm extends StatefulWidget {
+  final VoidCallback onGoToLogin;
 
-  const LoginForm({super.key, required this.onGoToRegister});
+  const RegisterForm({super.key, required this.onGoToLogin});
 
   @override
-  State<LoginForm> createState() => _LoginFormState();
+  State<RegisterForm> createState() => _RegisterFormState();
 }
 
-class _LoginFormState extends State<LoginForm> {
+class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
+  bool _obscureConfirm = true;
 
   @override
   void dispose() {
     _nameController.dispose();
     _passwordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  void _onLogin() {
+  void _onRegister() {
     if (_formKey.currentState!.validate()) {
       context.read<AuthBloc>().add(
-            SignInRequested(
+            SignUpRequested(
               name: _nameController.text.trim(),
               password: _passwordController.text,
             ),
@@ -59,13 +62,13 @@ class _LoginFormState extends State<LoginForm> {
               AnimatedListItem(index: 2, child: _buildNameField(palette)),
               const SizedBox(height: 24),
               AnimatedListItem(index: 3, child: _buildPasswordField(palette)),
-              const SizedBox(height: 40),
-              AnimatedListItem(index: 4, child: _buildLoginButton(palette)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 5, child: _buildRegisterLink(palette)),
+              AnimatedListItem(index: 4, child: _buildConfirmPasswordField(palette)),
+              const SizedBox(height: 40),
+              AnimatedListItem(index: 5, child: _buildRegisterButton(palette)),
+              const SizedBox(height: 24),
+              AnimatedListItem(index: 6, child: _buildLoginLink(palette)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 6, child: _buildSecurityHint(palette)),
-              const SizedBox(height: 32),
               AnimatedListItem(index: 7, child: _buildFooter(palette)),
             ],
           ),
@@ -82,9 +85,9 @@ class _LoginFormState extends State<LoginForm> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Aura',
+                text: 'Crear Cuenta',
                 style: GoogleFonts.playfairDisplay(
-                  fontSize: 44,
+                  fontSize: 36,
                   fontWeight: FontWeight.bold,
                   fontStyle: FontStyle.italic,
                   color: palette.gold,
@@ -96,7 +99,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 12),
         Text(
-          'RED FINANCIERA PRIVADA',
+          'UNIRTE A AURA',
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -113,11 +116,14 @@ class _LoginFormState extends State<LoginForm> {
       palette: palette,
       controller: _nameController,
       label: 'Usuario',
-      hint: 'Tu nombre de usuario',
+      hint: 'Elige un nombre de usuario',
       icon: Icons.person_outline,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Ingresa tu nombre de usuario';
+          return 'Ingresa un nombre de usuario';
+        }
+        if (value.trim().length < 3) {
+          return 'Minimo 3 caracteres';
         }
         return null;
       },
@@ -149,7 +155,10 @@ class _LoginFormState extends State<LoginForm> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Ingresa tu contraseña';
+              return 'Ingresa una contraseña';
+            }
+            if (value.length < 6) {
+              return 'Minimo 6 caracteres';
             }
             return null;
           },
@@ -167,6 +176,61 @@ class _LoginFormState extends State<LoginForm> {
               onPressed: () {
                 setState(() {
                   _obscurePassword = !_obscurePassword;
+                });
+              },
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildConfirmPasswordField(dynamic palette) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: const EdgeInsets.only(left: 4, bottom: 8),
+          child: Text(
+            'CONFIRMAR CONTRASEÑA',
+            style: GoogleFonts.dmSans(
+              fontSize: 10,
+              fontWeight: FontWeight.w800,
+              color: palette.gold.withValues(alpha: 0.7),
+              letterSpacing: 2,
+            ),
+          ),
+        ),
+        TextFormField(
+          controller: _confirmPasswordController,
+          obscureText: _obscureConfirm,
+          style: GoogleFonts.dmSans(
+            fontSize: 15,
+            color: palette.textPrimary,
+          ),
+          validator: (value) {
+            if (value == null || value.isEmpty) {
+              return 'Confirma tu contraseña';
+            }
+            if (value != _passwordController.text) {
+              return 'Las contraseñas no coinciden';
+            }
+            return null;
+          },
+          decoration: InputDecoration(
+            hintText: '••••••••',
+            hintStyle: GoogleFonts.dmSans(
+              fontSize: 15,
+              color: palette.textHint,
+            ),
+            suffixIcon: IconButton(
+              icon: Icon(
+                _obscureConfirm ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                color: palette.gold.withValues(alpha: 0.5),
+              ),
+              onPressed: () {
+                setState(() {
+                  _obscureConfirm = !_obscureConfirm;
                 });
               },
             ),
@@ -222,14 +286,14 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildLoginButton(dynamic palette) {
+  Widget _buildRegisterButton(dynamic palette) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return SizedBox(
           width: double.infinity,
           height: 56,
           child: ElevatedButton(
-            onPressed: state is AuthLoading ? null : _onLogin,
+            onPressed: state is AuthLoading ? null : _onRegister,
             style: ElevatedButton.styleFrom(
               backgroundColor: palette.gold,
               foregroundColor: palette.background,
@@ -250,7 +314,7 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   )
                 : Text(
-                    'ENTRAR',
+                    'CREAR CUENTA',
                     style: GoogleFonts.dmSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
@@ -263,19 +327,19 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildRegisterLink(dynamic palette) {
+  Widget _buildLoginLink(dynamic palette) {
     return GestureDetector(
-      onTap: widget.onGoToRegister,
+      onTap: widget.onGoToLogin,
       child: RichText(
         text: TextSpan(
-          text: '¿No tienes cuenta? ',
+          text: '¿Ya tienes cuenta? ',
           style: GoogleFonts.dmSans(
             fontSize: 13,
             color: palette.textMuted,
           ),
           children: [
             TextSpan(
-              text: 'Regístrate',
+              text: 'Inicia sesión',
               style: GoogleFonts.dmSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -285,28 +349,6 @@ class _LoginFormState extends State<LoginForm> {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildSecurityHint(dynamic palette) {
-    return Column(
-      children: [
-        Text(
-          'CIFRADO DE EXTREMO A EXTREMO',
-          style: GoogleFonts.dmSans(
-            fontSize: 9,
-            fontWeight: FontWeight.w800,
-            color: palette.gold.withValues(alpha: 0.35),
-            letterSpacing: 3,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Container(
-          width: 16,
-          height: 1,
-          color: palette.gold.withValues(alpha: 0.2),
-        ),
-      ],
     );
   }
 

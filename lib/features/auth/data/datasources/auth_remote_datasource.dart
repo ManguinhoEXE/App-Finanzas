@@ -5,10 +5,21 @@ import '../../../../core/errors/exceptions.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
-  Future<UserModel> activateKey({
-    required String key,
+  Future<UserModel> signUp({
     required String name,
+    required String password,
   });
+
+  Future<UserModel> signIn({
+    required String name,
+    required String password,
+  });
+
+  Future<Map<String, dynamic>> addPartner(String friendCode);
+
+  Future<void> removePartner();
+
+  Future<UserModel?> getCurrentUser();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -17,32 +28,29 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   AuthRemoteDataSourceImpl({required SupabaseClient client}) : _client = client;
 
   @override
-  Future<UserModel> activateKey({
-    required String key,
+  Future<UserModel> signUp({
     required String name,
+    required String password,
   }) async {
     try {
-      // Usar SP atómico para activar llave (previene race condition)
-      final result = await _client.rpc('sp_activate_key', params: {
-        'p_key': key,
+      final result = await _client.rpc('sp_register_user', params: {
         'p_name': name,
+        'p_password': password,
       });
 
-      // El SP retorna un JSON con 'error' o con 'id' y 'name'
       if (result is Map<String, dynamic>) {
         if (result.containsKey('error')) {
           throw AppAuthException(message: result['error']);
         }
 
-        final userId = result['id'] as int;
-        final userName = result['name'] as String;
+        final user = UserModel.fromJson(result);
 
-        // Guardar sesion localmente
         final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(AppConstants.userIdKey, userId);
-        await prefs.setString(AppConstants.userNameKey, userName);
+        await prefs.setInt(AppConstants.userIdKey, user.id);
+        await prefs.setString(AppConstants.userNameKey, user.name);
+        await prefs.setString(AppConstants.friendCodeKey, user.friendCode);
 
-        return UserModel(id: userId, name: userName);
+        return user;
       }
 
       throw ServerException(message: 'Respuesta inesperada del servidor');
@@ -51,7 +59,134 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
     } catch (e) {
-      throw ServerException(message: 'Error al activar llave: $e');
+      throw ServerException(message: 'Error al registrar: $e');
     }
+  }
+
+  @override
+  Future<UserModel> signIn({
+    required String name,
+    required String password,
+  }) async {
+    try {
+      final result = await _client.rpc('sp_login', params: {
+        'p_name': name,
+        'p_password': password,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+
+        final user = UserModel.fromJson(result);
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(AppConstants.userIdKey, user.id);
+        await prefs.setString(AppConstants.userNameKey, user.name);
+        await prefs.setString(AppConstants.friendCodeKey, user.friendCode);
+
+        // Guardar partner info si existe
+        final partnerId = result['partner_id'] as int?;
+        final partnerName = result['partner_name'] as String?;
+        if (partnerId != null && partnerName != null) {
+          await prefs.setInt(AppConstants.partnerIdKey, partnerId);
+          await prefs.setString(AppConstants.partnerNameKey, partnerName);
+        } else {
+          await prefs.remove(AppConstants.partnerIdKey);
+          await prefs.remove(AppConstants.partnerNameKey);
+        }
+
+        return user;
+      }
+
+      throw ServerException(message: 'Respuesta inesperada del servidor');
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Error al iniciar sesion: $e');
+    }
+  }
+
+  @override
+  Future<Map<String, dynamic>> addPartner(String friendCode) async {
+    try {
+      final userId = await _getCurrentUserId();
+
+      final result = await _client.rpc('sp_add_partner', params: {
+        'p_friend_code': friendCode,
+        'p_user_id': userId,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setInt(AppConstants.partnerIdKey, result['partner_id'] as int);
+        await prefs.setString(AppConstants.partnerNameKey, result['partner_name'] as String);
+
+        return result;
+      }
+
+      throw ServerException(message: 'Respuesta inesperada del servidor');
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Error al agregar amigo: $e');
+    }
+  }
+
+  @override
+  Future<void> removePartner() async {
+    try {
+      final userId = await _getCurrentUserId();
+
+      final result = await _client.rpc('sp_remove_partner', params: {
+        'p_user_id': userId,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(AppConstants.partnerIdKey);
+      await prefs.remove(AppConstants.partnerNameKey);
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Error al desvincular: $e');
+    }
+  }
+
+  @override
+  Future<UserModel?> getCurrentUser() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userName = prefs.getString(AppConstants.userNameKey);
+    final friendCode = prefs.getString(AppConstants.friendCodeKey);
+
+    if (userId != null && userName != null && friendCode != null) {
+      return UserModel(id: userId, name: userName, friendCode: friendCode);
+    }
+
+    return null;
+  }
+
+  Future<int> _getCurrentUserId() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt(AppConstants.userIdKey);
+    if (userId == null) throw AppAuthException(message: 'Usuario no autenticado');
+    return userId;
   }
 }
