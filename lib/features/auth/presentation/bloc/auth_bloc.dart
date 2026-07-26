@@ -1,4 +1,4 @@
-import 'package:flutter_bloc/flutter_bloc.dart';
+﻿import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/usecases/usecase.dart';
@@ -7,6 +7,7 @@ import '../../domain/usecases/sign_up_usecase.dart';
 import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/add_partner_usecase.dart';
 import '../../domain/usecases/remove_partner_usecase.dart';
+import '../../domain/usecases/complete_guide_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -15,12 +16,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final SignInUseCase signInUseCase;
   final AddPartnerUseCase addPartnerUseCase;
   final RemovePartnerUseCase removePartnerUseCase;
+  final CompleteGuideUseCase completeGuideUseCase;
 
   AuthBloc({
     required this.signUpUseCase,
     required this.signInUseCase,
     required this.addPartnerUseCase,
     required this.removePartnerUseCase,
+    required this.completeGuideUseCase,
   }) : super(const AuthInitial()) {
     on<SignUpRequested>(_onSignUpRequested);
     on<SignInRequested>(_onSignInRequested);
@@ -28,6 +31,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<RemovePartnerRequested>(_onRemovePartnerRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<CheckSessionRequested>(_onCheckSessionRequested);
+    on<CompleteGuideRequested>(_onCompleteGuideRequested);
   }
 
   Future<void> _onSignUpRequested(
@@ -114,6 +118,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await prefs.remove(AppConstants.friendCodeKey);
     await prefs.remove(AppConstants.partnerIdKey);
     await prefs.remove(AppConstants.partnerNameKey);
+    await prefs.remove(AppConstants.guideKey);
     emit(const AuthUnauthenticated());
   }
 
@@ -127,11 +132,37 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final friendCode = prefs.getString(AppConstants.friendCodeKey);
 
     if (userId != null && userName != null && friendCode != null) {
+      final guide = prefs.getInt(AppConstants.guideKey);
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode),
+        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide),
       ));
     } else {
       emit(const AuthUnauthenticated());
+    }
+  }
+
+  Future<void> _onCompleteGuideRequested(
+    CompleteGuideRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await completeGuideUseCase(const NoParams());
+
+    result.fold(
+      (failure) {},
+      (_) {},
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setInt(AppConstants.guideKey, 1);
+
+    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userName = prefs.getString(AppConstants.userNameKey);
+    final friendCode = prefs.getString(AppConstants.friendCodeKey);
+
+    if (userId != null && userName != null && friendCode != null) {
+      emit(AuthAuthenticated(
+        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: 1),
+      ));
     }
   }
 }

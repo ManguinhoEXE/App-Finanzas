@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/ahorro_bloc.dart';
@@ -14,6 +14,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/theme_toggle.dart';
+import '../../../../core/widgets/feedback_button.dart';
 
 class AhorrosPage extends StatefulWidget {
   final VoidCallback? onSwitchModule;
@@ -91,6 +92,11 @@ class _AhorrosPageState extends State<AhorrosPage> {
                     ),
                   ],
                 ),
+                const Positioned(
+                  bottom: 24,
+                  right: 24,
+                  child: FeedbackButton(),
+                ),
               ],
             );
           },
@@ -135,42 +141,40 @@ class _AhorrosPageState extends State<AhorrosPage> {
         ),
         const SizedBox(height: 12),
         AnimatedSwitcher(
-          duration: const Duration(milliseconds: 500),
-          transitionBuilder: (child, animation) {
-            return FadeTransition(
-              opacity: animation,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(0, 0.15),
-                  end: Offset.zero,
-                ).animate(animation),
-                child: child,
-              ),
-            );
-          },
-          child: Text(
-            CurrencyFormatter.format(total),
-            key: ValueKey<String>(CurrencyFormatter.format(total)),
-            style: GoogleFonts.dmSans(
-              fontSize: 52,
-              fontWeight: FontWeight.w800,
-              color: palette.textPrimary,
-              height: 1,
-              shadows: [
-                Shadow(
-                  color: palette.gold.withValues(alpha: 0.2),
-                  blurRadius: 40,
+            duration: const Duration(milliseconds: 500),
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: const Offset(0, 0.15),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
                 ),
-              ],
+              );
+            },
+            child: Text(
+              CurrencyFormatter.format(total),
+              key: ValueKey<String>(CurrencyFormatter.format(total)),
+              style: GoogleFonts.dmSans(
+                fontSize: 52,
+                fontWeight: FontWeight.w800,
+                color: palette.textPrimary,
+                height: 1,
+                shadows: [
+                  Shadow(
+                    color: palette.gold.withValues(alpha: 0.2),
+                    blurRadius: 40,
+                  ),
+                ],
+              ),
             ),
           ),
-        ),
         const SizedBox(height: 28),
       ],
     );
   }
-
-
 
   Widget _buildModuleSwitch() {
     final palette = AppColors.of(context);
@@ -275,21 +279,21 @@ class _AhorrosPageState extends State<AhorrosPage> {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           _buildActionItem(
-            icon: Icons.flag_outlined,
-            label: 'Nueva Meta',
-            onTap: () {
-              final bloc = context.read<AhorroBloc>();
-              showModalBottomSheet(
-                context: context,
-                isScrollControlled: true,
-                backgroundColor: Colors.transparent,
-                builder: (_) => BlocProvider<AhorroBloc>.value(
-                  value: bloc,
-                  child: const CreateAhorroSheet(),
-                ),
-              );
-            },
-          ),
+              icon: Icons.flag_outlined,
+              label: 'Nueva Meta',
+              onTap: () {
+                final bloc = context.read<AhorroBloc>();
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (_) => BlocProvider<AhorroBloc>.value(
+                    value: bloc,
+                    child: const CreateAhorroSheet(),
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

@@ -1,4 +1,4 @@
-class AppConstants {
+﻿class AppConstants {
   AppConstants._();
 
   // Storage Keys
@@ -7,6 +7,7 @@ class AppConstants {
   static const String friendCodeKey = 'friend_code';
   static const String partnerIdKey = 'partner_id';
   static const String partnerNameKey = 'partner_name';
+  static const String guideKey = 'guide';
 
   // Routes
   static const String loginRoute = '/login';

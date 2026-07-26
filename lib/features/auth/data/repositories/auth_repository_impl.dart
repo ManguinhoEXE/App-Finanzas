@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
 import '../../../../core/errors/exceptions.dart';
 import '../../../../core/errors/failures.dart';
 import '../../domain/entities/user.dart';
@@ -75,5 +75,19 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<User?> getCurrentUser() async {
     return await remoteDataSource.getCurrentUser();
+  }
+
+  @override
+  Future<Either<Failure, void>> completeGuide() async {
+    try {
+      await remoteDataSource.completeGuide();
+      return const Right(null);
+    } on AppAuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Error inesperado: $e'));
+    }
   }
 }

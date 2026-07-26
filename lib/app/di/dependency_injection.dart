@@ -1,10 +1,11 @@
-import 'package:get_it/get_it.dart';
+﻿import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../features/auth/presentation/bloc/auth_bloc.dart';
 import '../../features/auth/domain/usecases/sign_up_usecase.dart';
 import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/add_partner_usecase.dart';
 import '../../features/auth/domain/usecases/remove_partner_usecase.dart';
+import '../../features/auth/domain/usecases/complete_guide_usecase.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -37,12 +38,14 @@ void setupDependencies() {
   getIt.registerLazySingleton(() => SignInUseCase(getIt()));
   getIt.registerLazySingleton(() => AddPartnerUseCase(getIt()));
   getIt.registerLazySingleton(() => RemovePartnerUseCase(getIt()));
+  getIt.registerLazySingleton(() => CompleteGuideUseCase(getIt()));
   getIt.registerFactory(
     () => AuthBloc(
       signUpUseCase: getIt(),
       signInUseCase: getIt(),
       addPartnerUseCase: getIt(),
       removePartnerUseCase: getIt(),
+      completeGuideUseCase: getIt(),
     ),
   );
 

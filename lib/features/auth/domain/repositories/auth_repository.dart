@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+﻿import 'package:dartz/dartz.dart';
 import '../../../../core/errors/failures.dart';
 import '../entities/user.dart';
 
@@ -18,4 +18,6 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> removePartner();
 
   Future<User?> getCurrentUser();
+
+  Future<Either<Failure, void>> completeGuide();
 }

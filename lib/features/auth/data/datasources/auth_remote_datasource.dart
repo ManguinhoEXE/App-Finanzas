@@ -1,4 +1,4 @@
-import 'package:shared_preferences/shared_preferences.dart';
+﻿import 'package:shared_preferences/shared_preferences.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
@@ -20,6 +20,8 @@ abstract class AuthRemoteDataSource {
   Future<void> removePartner();
 
   Future<UserModel?> getCurrentUser();
+
+  Future<void> completeGuide();
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -86,7 +88,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         await prefs.setString(AppConstants.userNameKey, user.name);
         await prefs.setString(AppConstants.friendCodeKey, user.friendCode);
 
-        // Guardar partner info si existe
+        if (user.guide != null) {
+          await prefs.setInt(AppConstants.guideKey, user.guide!);
+        } else {
+          await prefs.remove(AppConstants.guideKey);
+        }
+
         final partnerId = result['partner_id'] as int?;
         final partnerName = result['partner_name'] as String?;
         if (partnerId != null && partnerName != null) {
@@ -164,8 +171,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       rethrow;
     } on PostgrestException catch (e) {
       throw ServerException(message: e.message);
-    } catch (e) {
-      throw ServerException(message: 'Error al desvincular: $e');
     }
   }
 
@@ -181,6 +186,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
 
     return null;
+  }
+
+  @override
+  Future<void> completeGuide() async {
+    try {
+      final userId = await _getCurrentUserId();
+
+      final result = await _client.rpc('sp_complete_guide', params: {
+        'p_user_id': userId,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setInt(AppConstants.guideKey, 1);
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    }
   }
 
   Future<int> _getCurrentUserId() async {

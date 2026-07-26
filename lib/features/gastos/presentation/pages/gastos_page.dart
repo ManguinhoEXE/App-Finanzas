@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/gasto_bloc.dart';
@@ -15,6 +15,7 @@ import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/theme_toggle.dart';
+import '../../../../core/widgets/feedback_button.dart';
 
 class GastosPage extends StatefulWidget {
   final VoidCallback? onSwitchModule;
@@ -116,6 +117,11 @@ class _GastosPageState extends State<GastosPage> {
                           : _buildList(context, gastos),
                     ),
                   ],
+                ),
+                const Positioned(
+                  bottom: 100,
+                  right: 24,
+                  child: FeedbackButton(),
                 ),
               ],
             );

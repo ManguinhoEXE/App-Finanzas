@@ -1,9 +1,10 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/app_colors.dart';
 import '../core/theme/palette_provider.dart';
 import '../core/utils/slide_route_builder.dart';
+import '../core/widgets/onboarding_page.dart';
 import '../features/auth/presentation/bloc/auth_bloc.dart';
 import '../features/auth/presentation/bloc/auth_event.dart';
 import '../features/auth/presentation/bloc/auth_state.dart';
@@ -73,8 +74,11 @@ class _AuthGateState extends State<_AuthGate> {
       },
       listener: (context, state) {
         if (state is AuthAuthenticated) {
+          final destination = state.user.guide == null
+              ? const OnboardingPage()
+              : const HomePage();
           Navigator.of(context).pushAndRemoveUntil(
-            SlideRouteBuilder(page: const HomePage()),
+            SlideRouteBuilder(page: destination),
             (route) => false,
           );
         } else if (state is AuthUnauthenticated || state is AuthError) {
@@ -97,6 +101,9 @@ class _AuthGateState extends State<_AuthGate> {
       child: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
           if (state is AuthAuthenticated) {
+            if (state.user.guide == null) {
+              return const OnboardingPage();
+            }
             return const HomePage();
           }
           if (state is AuthUnauthenticated) {
@@ -131,6 +138,11 @@ class _HomePageState extends State<HomePage> {
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOut,
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
   }
 
   @override
