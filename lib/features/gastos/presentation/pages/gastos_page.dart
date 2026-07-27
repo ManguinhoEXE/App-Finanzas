@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/gasto_bloc.dart';
 import '../bloc/gasto_event.dart';
@@ -10,18 +11,19 @@ import '../widgets/export_gastos_sheet.dart';
 import '../../../auth/presentation/widgets/friend_code_sheet.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
+
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
+import '../../../../core/utils/month_names.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/widgets/feedback_button.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../widgets/settings_sheet.dart';
 
 class GastosPage extends StatefulWidget {
-  final VoidCallback? onSwitchModule;
-
-  const GastosPage({super.key, this.onSwitchModule});
+  const GastosPage({super.key});
 
   @override
   State<GastosPage> createState() => _GastosPageState();
@@ -220,9 +222,9 @@ class _GastosPageState extends State<GastosPage> {
   }
 
   Widget _buildHeader(double total) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
-    final months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    final monthName = '${months[_selectedMonth.month]} ${_selectedMonth.year}';
+    final monthName = '${getMonthAbbreviation(_selectedMonth.month, Localizations.localeOf(context).languageCode)} ${_selectedMonth.year}';
 
     final authState = context.watch<AuthBloc>().state;
     final double salary = (authState is AuthAuthenticated && authState.user.salary != null)
@@ -236,19 +238,8 @@ class _GastosPageState extends State<GastosPage> {
         const SizedBox(height: 24),
         _buildMonthSelector(monthName),
         const SizedBox(height: 20),
-        if (salary > 0) ...[
-          Text(
-            CurrencyFormatter.format(salary),
-            style: GoogleFonts.dmSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: palette.textMuted,
-            ),
-          ),
-          const SizedBox(height: 16),
-        ],
         Text(
-          'GASTOS TOTALES',
+          l10n.gastosTotalLabel,
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -349,6 +340,7 @@ class _GastosPageState extends State<GastosPage> {
 
 
   Widget _buildModuleSwitch() {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
@@ -395,8 +387,8 @@ class _GastosPageState extends State<GastosPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildSwitchOption(context, 'Gastos', true),
-              _buildSwitchOption(context, 'Ahorros', false),
+              _buildSwitchOption(context, l10n.gastosModuleTab, true),
+              _buildSwitchOption(context, l10n.ahorrosModuleTab, false),
             ],
           ),
         ),
@@ -411,7 +403,7 @@ class _GastosPageState extends State<GastosPage> {
     return GestureDetector(
       onTap: () {
         if (!active) {
-          widget.onSwitchModule?.call();
+          context.go('/ahorros');
         }
       },
       child: AnimatedContainer(
@@ -445,6 +437,7 @@ class _GastosPageState extends State<GastosPage> {
   }
 
   Widget _buildList(BuildContext context, List gastos) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -455,7 +448,7 @@ class _GastosPageState extends State<GastosPage> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Flujo Financiero',
+                l10n.gastosFinancialFlowTitle,
                 style: GoogleFonts.dmSans(
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
@@ -499,6 +492,7 @@ class _GastosPageState extends State<GastosPage> {
   }
 
   Widget _buildEmpty() {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Center(
       child: AnimatedOpacity(
@@ -514,7 +508,7 @@ class _GastosPageState extends State<GastosPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No hay gastos registrados',
+              l10n.gastosEmptyMessage,
               style: GoogleFonts.dmSans(
                 fontSize: 14,
                 color: palette.textMuted,
@@ -527,6 +521,7 @@ class _GastosPageState extends State<GastosPage> {
   }
 
   Widget _buildError(BuildContext context, String message) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Center(
       child: Column(
@@ -540,7 +535,7 @@ class _GastosPageState extends State<GastosPage> {
             onPressed: () {
               _loadFilteredGastos();
             },
-            child: const Text('Reintentar'),
+            child: Text(l10n.retryButton),
           ),
         ],
       ),

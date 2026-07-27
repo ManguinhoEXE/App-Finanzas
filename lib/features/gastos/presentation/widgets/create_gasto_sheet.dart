@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_input_formatter.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../bloc/gasto_bloc.dart';
 import '../bloc/gasto_event.dart';
 
@@ -22,12 +23,19 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
   String _fecha = DateTime.now().toIso8601String().substring(0, 10);
   bool _compartido = false;
 
-  static const _predefinedCategories = [
-    'Transporte',
-    'Entretenimiento',
-    'Comida',
-    'Vivienda',
-  ];
+  List<String> _predefinedCategories = [];
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context);
+    _predefinedCategories = [
+      l10n.gastoCategoryTransport,
+      l10n.gastoCategoryEntertainment,
+      l10n.gastoCategoryFood,
+      l10n.gastoCategoryHousing,
+    ];
+  }
 
   @override
   void dispose() {
@@ -79,6 +87,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -107,7 +116,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'NUEVO GASTO',
+                  l10n.gastoCreateTitle,
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -134,15 +143,15 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                     return TextFormField(
                       controller: controller,
                       focusNode: focusNode,
-                      validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                      validator: (v) => v == null || v.trim().isEmpty ? l10n.validationRequired : null,
                       onChanged: (v) => _categoriaController.text = v,
                       style: GoogleFonts.dmSans(
                         fontSize: 14,
                         color: palette.textPrimary,
                       ),
                       decoration: InputDecoration(
-                        labelText: 'CATEGORIA',
-                        hintText: 'Selecciona o escribe una...',
+                        labelText: l10n.gastoCategoryLabel,
+                        hintText: l10n.gastoCategoryHint,
                         labelStyle: GoogleFonts.dmSans(
                           fontSize: 10,
                           fontWeight: FontWeight.w800,
@@ -212,23 +221,23 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                 _buildField(
                   context,
                   controller: _descripcionController,
-                  label: 'DESCRIPCION',
-                  hint: 'Ej: Almuerzo en restaurante',
+                  label: l10n.gastoDescriptionLabel,
+                  hint: l10n.gastoDescriptionHint,
                   icon: Icons.description_outlined,
-                  validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                  validator: (v) => v == null || v.isEmpty ? l10n.validationRequired : null,
                 ),
                 const SizedBox(height: 16),
                 _buildField(
                   context,
                   controller: _valorController,
-                  label: 'VALOR',
+                  label: l10n.gastoAmountLabel,
                   hint: '0',
                   icon: Icons.attach_money,
                   keyboardType: TextInputType.number,
                   inputFormatters: [CurrencyInputFormatter()],
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Requerido';
-                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return 'Numero invalido';
+                    if (v == null || v.isEmpty) return l10n.validationRequired;
+                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return l10n.validationInvalidNumber;
                     return null;
                   },
                 ),
@@ -239,7 +248,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                     context,
                     enabled: false,
                     controller: TextEditingController(text: _fecha),
-                    label: 'FECHA',
+                    label: l10n.gastoDateLabel,
                     icon: Icons.calendar_today_outlined,
                   ),
                 ),
@@ -255,7 +264,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                     GestureDetector(
                       onTap: () => setState(() => _compartido = !_compartido),
                       child: Text(
-                        'Compartir',
+                        l10n.gastoShareLabel,
                         style: GoogleFonts.dmSans(
                           fontSize: 13,
                           color: palette.textSecondary,
@@ -278,7 +287,7 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                       ),
                     ),
                     child: Text(
-                      'GUARDAR GASTO',
+                      l10n.gastoSaveButton,
                       style: GoogleFonts.dmSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,

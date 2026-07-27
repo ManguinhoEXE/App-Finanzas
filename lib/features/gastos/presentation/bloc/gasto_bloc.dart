@@ -31,10 +31,10 @@ class GastoBloc extends Bloc<GastoEvent, GastoState> {
     if (state is GastoInitial) emit(const GastoLoading());
     _currentStartDate = event.startDate;
     _currentEndDate = event.endDate;
-    final result = await getGastosUseCase.callWithFilter(
+    final result = await getGastosUseCase(GastosFilterParams(
       startDate: event.startDate,
       endDate: event.endDate,
-    );
+    ));
     result.fold(
       (failure) => emit(GastoError(message: failure.message)),
       (gastos) {
@@ -49,7 +49,7 @@ class GastoBloc extends Bloc<GastoEvent, GastoState> {
     Emitter<GastoState> emit,
   ) async {
     emit(const GastoLoading());
-    final result = await getGastoUseCase(event.id);
+    final result = await getGastoUseCase(GetGastoParams(id: event.id));
     result.fold(
       (failure) => emit(GastoError(message: failure.message)),
       (gasto) => emit(GastoDetailLoaded(gasto: gasto)),
@@ -60,13 +60,13 @@ class GastoBloc extends Bloc<GastoEvent, GastoState> {
     AddGasto event,
     Emitter<GastoState> emit,
   ) async {
-    final result = await createGastoUseCase(
+    final result = await createGastoUseCase(CreateGastoParams(
       categoria: event.categoria,
       fecha: event.fecha,
       descripcion: event.descripcion,
       valor: event.valor,
       compartido: event.compartido,
-    );
+    ));
     result.fold(
       (failure) => emit(GastoError(message: failure.message)),
       (_) => add(LoadGastos(startDate: _currentStartDate, endDate: _currentEndDate)),
@@ -77,7 +77,10 @@ class GastoBloc extends Bloc<GastoEvent, GastoState> {
     UpdateGasto event,
     Emitter<GastoState> emit,
   ) async {
-    final result = await updateGastoUseCase(event.id, event.data);
+    final result = await updateGastoUseCase(UpdateGastoParams(
+      id: event.id,
+      data: event.data,
+    ));
     result.fold(
       (failure) => emit(GastoError(message: failure.message)),
       (_) => add(LoadGastos(startDate: _currentStartDate, endDate: _currentEndDate)),

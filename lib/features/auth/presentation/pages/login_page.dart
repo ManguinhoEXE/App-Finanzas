@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_state.dart';
 import '../widgets/login_form.dart';
-import 'register_page.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/utils/slide_route_builder.dart';
-import '../../../../app/app.dart';
 
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
@@ -24,10 +22,11 @@ class LoginPage extends StatelessWidget {
         },
         listener: (context, state) {
           if (state is AuthAuthenticated) {
-            Navigator.of(context).pushAndRemoveUntil(
-              SlideRouteBuilder(page: const HomePage()),
-              (route) => false,
-            );
+            if (state.user.guide == null) {
+              context.go('/onboarding');
+            } else {
+              context.go('/gastos');
+            }
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
@@ -45,12 +44,7 @@ class LoginPage extends StatelessWidget {
             behavior: HitTestBehavior.translucent,
             child: LoginForm(
               onGoToRegister: () {
-                Navigator.of(context).pushReplacement(
-                  SlideRouteBuilder(
-                    page: const RegisterPage(),
-                    slideFromRight: true,
-                  ),
-                );
+                context.push('/register');
               },
             ),
           ),

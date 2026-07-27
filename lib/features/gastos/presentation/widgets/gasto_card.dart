@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/currency_input_formatter.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../domain/entities/gasto.dart';
 import '../bloc/gasto_bloc.dart';
 import '../bloc/gasto_event.dart';
@@ -134,12 +135,7 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
   late String _fecha;
   late bool _compartido;
 
-  static const _predefinedCategories = [
-    'Transporte',
-    'Entretenimiento',
-    'Comida',
-    'Vivienda',
-  ];
+  List<String> _predefinedCategories = [];
 
   @override
   void initState() {
@@ -149,6 +145,18 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
     _valorController = TextEditingController(text: widget.gasto.valor.toStringAsFixed(0));
     _fecha = widget.gasto.fecha;
     _compartido = widget.gasto.compartido;
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final l10n = AppLocalizations.of(context);
+    _predefinedCategories = [
+      l10n.gastoCategoryTransport,
+      l10n.gastoCategoryEntertainment,
+      l10n.gastoCategoryFood,
+      l10n.gastoCategoryHousing,
+    ];
   }
 
   @override
@@ -202,6 +210,7 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
@@ -228,7 +237,7 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
               ),
               const SizedBox(height: 20),
               Text(
-                'EDITAR GASTO',
+                l10n.gastoEditTitle,
                 style: GoogleFonts.dmSans(
                   fontSize: 12,
                   fontWeight: FontWeight.w800,
@@ -258,8 +267,8 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
                     onChanged: (v) => _categoriaController.text = v,
                     style: GoogleFonts.dmSans(fontSize: 14, color: palette.textPrimary),
                     decoration: InputDecoration(
-                      labelText: 'CATEGORIA',
-                      hintText: 'Selecciona o escribe una...',
+                      labelText: l10n.gastoCategoryLabel,
+                      hintText: l10n.gastoCategoryHint,
                       labelStyle: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.gold.withValues(alpha: 0.6), letterSpacing: 1.5),
                       prefixIcon: Icon(Icons.category_outlined, color: palette.gold, size: 20),
                       filled: true,
@@ -305,13 +314,13 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
                 },
               ),
               const SizedBox(height: 16),
-              _buildField(context, controller: _descripcionController, label: 'DESCRIPCION', icon: Icons.description_outlined),
+              _buildField(context, controller: _descripcionController, label: l10n.gastoDescriptionLabel, icon: Icons.description_outlined),
               const SizedBox(height: 16),
-              _buildField(context, controller: _valorController, label: 'VALOR', icon: Icons.attach_money, keyboardType: TextInputType.number, inputFormatters: [CurrencyInputFormatter()]),
+              _buildField(context, controller: _valorController, label: l10n.gastoAmountLabel, icon: Icons.attach_money, keyboardType: TextInputType.number, inputFormatters: [CurrencyInputFormatter()]),
               const SizedBox(height: 16),
               GestureDetector(
                 onTap: _pickDate,
-                child: _buildField(context, controller: TextEditingController(text: _fecha), label: 'FECHA', icon: Icons.calendar_today_outlined, enabled: false),
+                child: _buildField(context, controller: TextEditingController(text: _fecha), label: l10n.gastoDateLabel, icon: Icons.calendar_today_outlined, enabled: false),
               ),
               const SizedBox(height: 16),
               GestureDetector(
@@ -325,7 +334,7 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
                     ),
                     const SizedBox(width: 12),
                     Text(
-                      'Compartido',
+                      l10n.gastoSharedLabel,
                       style: GoogleFonts.dmSans(fontSize: 13, color: palette.textSecondary),
                     ),
                   ],
@@ -343,7 +352,7 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                   ),
                   child: Text(
-                    'ACTUALIZAR',
+                    l10n.gastoUpdateButton,
                     style: GoogleFonts.dmSans(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 2),
                   ),
                 ),

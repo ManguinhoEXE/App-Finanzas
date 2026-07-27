@@ -31,11 +31,17 @@ dependencies:
   flutter:
     sdk: flutter
 
+  flutter_localizations:
+    sdk: flutter
+
   cupertino_icons: ^1.0.8
   
   # State Management
   flutter_bloc: ^8.1.6
   equatable: ^2.0.7
+  
+  # Routing
+  go_router: ^14.8.1
   
   # Dependency Injection
   get_it: ^8.0.2
@@ -69,6 +75,10 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
 
+  # Mocking
+  mocktail: ^1.0.4
+  bloc_test: ^9.1.7
+
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -84,6 +94,8 @@ dev_dependencies:
 
 # The following section is specific to Flutter packages.
 flutter:
+
+  generate: true
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

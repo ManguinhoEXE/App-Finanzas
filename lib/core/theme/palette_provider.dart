@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:go_router/go_router.dart';
 import 'app_palettes.dart';
 import 'color_palette.dart';
+import '../../app/di/dependency_injection.dart';
+import '../services/local_storage_service.dart';
 
 class PaletteProvider extends InheritedWidget {
   final ValueNotifier<ColorPalette> paletteNotifier;
@@ -43,17 +45,18 @@ class _PaletteProviderScopeState extends State<PaletteProviderScope> {
   static const _key = 'app_theme';
   bool _isDark = true;
   late final ValueNotifier<ColorPalette> _notifier;
+  late final LocalStorageService _localStorage;
 
   @override
   void initState() {
     super.initState();
+    _localStorage = getIt<LocalStorageService>();
     _notifier = ValueNotifier(AppPalettes.darkPalette);
     _loadTheme();
   }
 
   Future<void> _loadTheme() async {
-    final prefs = await SharedPreferences.getInstance();
-    final saved = prefs.getString(_key);
+    final saved = await _localStorage.getString(_key);
     if (saved == 'pastel') {
       _isDark = false;
       _notifier.value = AppPalettes.pastelPalette;
@@ -65,9 +68,7 @@ class _PaletteProviderScopeState extends State<PaletteProviderScope> {
       _isDark = !_isDark;
       _notifier.value = _isDark ? AppPalettes.darkPalette : AppPalettes.pastelPalette;
     });
-    SharedPreferences.getInstance().then((prefs) {
-      prefs.setString(_key, _isDark ? 'dark' : 'pastel');
-    });
+    _localStorage.setString(_key, _isDark ? 'dark' : 'pastel');
   }
 
   @override

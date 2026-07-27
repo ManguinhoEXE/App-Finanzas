@@ -3,6 +3,8 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:share_plus/share_plus.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/excel_generator.dart';
+import '../../../../core/utils/month_names.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../domain/entities/gasto.dart';
 
 class ExportGastosSheet extends StatelessWidget {
@@ -17,6 +19,7 @@ class ExportGastosSheet extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Container(
       padding: const EdgeInsets.fromLTRB(24, 16, 24, 24),
@@ -37,7 +40,7 @@ class ExportGastosSheet extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'EXPORTAR GASTOS',
+            l10n.exportGastosTitle,
             style: GoogleFonts.dmSans(
               fontSize: 12,
               fontWeight: FontWeight.w800,
@@ -47,7 +50,7 @@ class ExportGastosSheet extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           Text(
-            'Elige el rango a exportar',
+            l10n.exportGastosSubtitle,
             style: GoogleFonts.dmSans(
               fontSize: 13,
               color: palette.textMuted,
@@ -57,16 +60,16 @@ class ExportGastosSheet extends StatelessWidget {
           _buildOption(
             context,
             icon: Icons.calendar_month_outlined,
-            title: 'Mes actual',
-            subtitle: _monthName(selectedMonth),
+            title: l10n.exportGastosCurrentMonth,
+            subtitle: _monthName(context, selectedMonth),
             onTap: () => _exportMonth(context),
           ),
           const SizedBox(height: 12),
           _buildOption(
             context,
             icon: Icons.date_range_outlined,
-            title: 'Ultimos 3 meses',
-            subtitle: _threeMonthsRange(),
+            title: l10n.exportGastosLast3Months,
+            subtitle: _threeMonthsRange(context),
             onTap: () => _exportThreeMonths(context),
           ),
           const SizedBox(height: 16),
@@ -136,32 +139,34 @@ class ExportGastosSheet extends StatelessWidget {
     );
   }
 
-  String _monthName(DateTime date) {
-    const months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    return '${months[date.month]} ${date.year}';
+  String _monthName(BuildContext context, DateTime date) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return '${getMonthAbbreviation(date.month, locale)} ${date.year}';
   }
 
-  String _threeMonthsRange() {
+  String _threeMonthsRange(BuildContext context) {
     final now = DateTime.now();
     final start = DateTime(now.year, now.month - 2, 1);
-    return '${_monthName(start)} - ${_monthName(now)}';
+    return '${_monthName(context, start)} - ${_monthName(context, now)}';
   }
 
   Future<void> _exportMonth(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     Navigator.pop(context);
 
     if (currentGastos.isEmpty) {
-      _showSnackBar(context, 'No hay gastos para este mes', isError: true);
+      _showSnackBar(context, l10n.exportGastosEmptyMonth, isError: true);
       return;
     }
 
-    final months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-    final fileName = 'Gastos_${months[selectedMonth.month]}_${selectedMonth.year}';
+    final locale = Localizations.localeOf(context).languageCode;
+    final fileName = 'Gastos_${getMonthAbbreviation(selectedMonth.month, locale)}_${selectedMonth.year}';
 
     await _generateAndShare(context, currentGastos, fileName);
   }
 
   Future<void> _exportThreeMonths(BuildContext context) async {
+    final l10n = AppLocalizations.of(context);
     Navigator.pop(context);
 
     final now = DateTime.now();
@@ -171,7 +176,7 @@ class ExportGastosSheet extends StatelessWidget {
     final gastos = List<Gasto>.from(currentGastos);
 
     if (gastos.isEmpty) {
-      _showSnackBar(context, 'No hay gastos en los ultimos 3 meses', isError: true);
+      _showSnackBar(context, l10n.exportGastosEmpty3Months, isError: true);
       return;
     }
 
@@ -187,21 +192,34 @@ class ExportGastosSheet extends StatelessWidget {
     List<Gasto> gastos,
     String fileName,
   ) async {
+    final l10n = AppLocalizations.of(context);
     try {
-      final file = await ExcelGenerator.generateGastosExcel(
-        gastos: gastos,
+      final file = await ExcelGenerator.generateExcel(
+        sheetName: 'Gastos',
+        columns: [
+          ExcelColumn(header: 'Categoria', valueExtractor: (row) => row['categoria'] as String, width: 20),
+          ExcelColumn(header: 'Descripcion', valueExtractor: (row) => row['descripcion'] as String, width: 35),
+          ExcelColumn(header: 'Monto', valueExtractor: (row) => row['monto'] as String, width: 15),
+          ExcelColumn(header: 'Fecha', valueExtractor: (row) => row['fecha'] as String, width: 15),
+        ],
+        rows: gastos.map((g) => {
+          'categoria': g.categoria,
+          'descripcion': g.descripcion,
+          'monto': g.valor.toString(),
+          'fecha': g.fecha,
+        }).toList(),
         fileName: fileName,
       );
 
       if (context.mounted) {
         await Share.shareXFiles(
           [XFile(file.path)],
-          subject: 'Exportar gastos - $fileName',
+          subject: l10n.exportGastosShareSubject(fileName),
         );
       }
     } catch (e) {
       if (context.mounted) {
-        _showSnackBar(context, 'Error al generar el archivo', isError: true);
+        _showSnackBar(context, l10n.exportGastosError, isError: true);
       }
     }
   }

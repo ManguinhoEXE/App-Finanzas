@@ -7,6 +7,7 @@ import '../bloc/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/widgets/aura_logo.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class RegisterForm extends StatefulWidget {
   final VoidCallback onGoToLogin;
@@ -47,6 +48,7 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -57,17 +59,17 @@ class _RegisterFormState extends State<RegisterForm> {
             children: [
               const AnimatedListItem(index: 0, child: AuraLogo(size: 88)),
               const SizedBox(height: 40),
-              AnimatedListItem(index: 1, child: _buildHeader(palette)),
+              AnimatedListItem(index: 1, child: _buildHeader(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 2, child: _buildNameField(palette)),
+              AnimatedListItem(index: 2, child: _buildNameField(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 3, child: _buildPasswordField(palette)),
+              AnimatedListItem(index: 3, child: _buildPasswordField(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 4, child: _buildConfirmPasswordField(palette)),
+              AnimatedListItem(index: 4, child: _buildConfirmPasswordField(palette, l10n)),
               const SizedBox(height: 40),
-              AnimatedListItem(index: 5, child: _buildRegisterButton(palette)),
+              AnimatedListItem(index: 5, child: _buildRegisterButton(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 6, child: _buildLoginLink(palette)),
+              AnimatedListItem(index: 6, child: _buildLoginLink(palette, l10n)),
               const SizedBox(height: 48),
               AnimatedListItem(index: 7, child: _buildFooter(palette)),
             ],
@@ -77,7 +79,7 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildHeader(dynamic palette) {
+  Widget _buildHeader(dynamic palette, AppLocalizations l10n) {
     return Column(
       children: [
         RichText(
@@ -85,7 +87,7 @@ class _RegisterFormState extends State<RegisterForm> {
           text: TextSpan(
             children: [
               TextSpan(
-                text: 'Crear Cuenta',
+                text: l10n.registerTitle,
                 style: GoogleFonts.playfairDisplay(
                   fontSize: 36,
                   fontWeight: FontWeight.bold,
@@ -99,7 +101,7 @@ class _RegisterFormState extends State<RegisterForm> {
         ),
         const SizedBox(height: 12),
         Text(
-          'UNIRTE A AURA',
+          l10n.registerSubtitle,
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -111,33 +113,33 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildNameField(dynamic palette) {
+  Widget _buildNameField(dynamic palette, AppLocalizations l10n) {
     return _buildInputField(
       palette: palette,
       controller: _nameController,
-      label: 'Usuario',
-      hint: 'Elige un nombre de usuario',
+      label: l10n.registerUsernameLabel,
+      hint: l10n.registerUsernameHint,
       icon: Icons.person_outline,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Ingresa un nombre de usuario';
+          return l10n.registerUsernameValidationEmpty;
         }
         if (value.trim().length < 3) {
-          return 'Minimo 3 caracteres';
+          return l10n.registerUsernameValidationMinLength;
         }
         return null;
       },
     );
   }
 
-  Widget _buildPasswordField(dynamic palette) {
+  Widget _buildPasswordField(dynamic palette, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            'CONTRASEÑA',
+            l10n.registerPasswordLabel,
             style: GoogleFonts.dmSans(
               fontSize: 10,
               fontWeight: FontWeight.w800,
@@ -155,10 +157,10 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Ingresa una contraseña';
+              return l10n.registerPasswordValidationEmpty;
             }
             if (value.length < 6) {
-              return 'Minimo 6 caracteres';
+              return l10n.registerPasswordValidationMinLength;
             }
             return null;
           },
@@ -185,14 +187,14 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildConfirmPasswordField(dynamic palette) {
+  Widget _buildConfirmPasswordField(dynamic palette, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            'CONFIRMAR CONTRASEÑA',
+            l10n.registerConfirmPasswordLabel,
             style: GoogleFonts.dmSans(
               fontSize: 10,
               fontWeight: FontWeight.w800,
@@ -210,10 +212,10 @@ class _RegisterFormState extends State<RegisterForm> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Confirma tu contraseña';
+              return l10n.registerConfirmPasswordValidationEmpty;
             }
             if (value != _passwordController.text) {
-              return 'Las contraseñas no coinciden';
+              return l10n.registerConfirmPasswordValidationMismatch;
             }
             return null;
           },
@@ -286,7 +288,7 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildRegisterButton(dynamic palette) {
+  Widget _buildRegisterButton(dynamic palette, AppLocalizations l10n) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return SizedBox(
@@ -314,7 +316,7 @@ class _RegisterFormState extends State<RegisterForm> {
                     ),
                   )
                 : Text(
-                    'CREAR CUENTA',
+                    l10n.registerButton,
                     style: GoogleFonts.dmSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
@@ -327,19 +329,19 @@ class _RegisterFormState extends State<RegisterForm> {
     );
   }
 
-  Widget _buildLoginLink(dynamic palette) {
+  Widget _buildLoginLink(dynamic palette, AppLocalizations l10n) {
     return GestureDetector(
       onTap: widget.onGoToLogin,
       child: RichText(
         text: TextSpan(
-          text: '¿Ya tienes cuenta? ',
+          text: l10n.registerHasAccountPrefix,
           style: GoogleFonts.dmSans(
             fontSize: 13,
             color: palette.textMuted,
           ),
           children: [
             TextSpan(
-              text: 'Inicia sesión',
+              text: l10n.registerLoginLink,
               style: GoogleFonts.dmSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,

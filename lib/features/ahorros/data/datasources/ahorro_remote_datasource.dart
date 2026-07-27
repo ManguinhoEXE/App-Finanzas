@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../models/ahorro_model.dart';
 import '../models/movement_model.dart';
 
@@ -26,19 +26,22 @@ abstract class AhorroRemoteDataSource {
 
 class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
   final SupabaseClient _client;
+  final LocalStorageService _localStorage;
 
-  AhorroRemoteDataSourceImpl({required SupabaseClient client}) : _client = client;
+  AhorroRemoteDataSourceImpl({
+    required SupabaseClient client,
+    required LocalStorageService localStorage,
+  })  : _client = client,
+        _localStorage = localStorage;
 
   Future<int> _getCurrentUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
     if (userId == null) throw AppAuthException(message: 'Usuario no autenticado');
     return userId;
   }
 
   Future<int?> _getPartnerId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(AppConstants.partnerIdKey);
+    return await _localStorage.getInt(AppConstants.partnerIdKey);
   }
 
   Map<String, dynamic> _computeFields(Map<String, dynamic> json) {
@@ -65,10 +68,8 @@ class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
           .select('*, users!inner(name)');
 
       if (partnerId != null) {
-        // Tiene partner: ver metas propias + compartidas del partner
         query = query.or('owner.eq.$userId,and(is_shared.eq.true,owner.eq.$partnerId)');
       } else {
-        // Sin partner: solo ver metas propias
         query = query.eq('owner', userId);
       }
 
@@ -229,7 +230,6 @@ class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
     try {
       final userId = await _getCurrentUserId();
 
-      // Usar SP atómico para depositar (previene race condition)
       final result = await _client.rpc('sp_deposit', params: {
         'p_goal_id': id,
         'p_user_id': userId,
@@ -259,7 +259,6 @@ class AhorroRemoteDataSourceImpl implements AhorroRemoteDataSource {
     try {
       final userId = await _getCurrentUserId();
 
-      // Usar SP atómico para retirar (previene race condition y overdraft)
       final result = await _client.rpc('sp_withdraw', params: {
         'p_goal_id': id,
         'p_user_id': userId,

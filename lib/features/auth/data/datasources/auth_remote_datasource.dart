@@ -1,7 +1,7 @@
-﻿import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+﻿import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../models/user_model.dart';
 
 abstract class AuthRemoteDataSource {
@@ -28,8 +28,13 @@ abstract class AuthRemoteDataSource {
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final SupabaseClient _client;
+  final LocalStorageService _localStorage;
 
-  AuthRemoteDataSourceImpl({required SupabaseClient client}) : _client = client;
+  AuthRemoteDataSourceImpl({
+    required SupabaseClient client,
+    required LocalStorageService localStorage,
+  })  : _client = client,
+        _localStorage = localStorage;
 
   @override
   Future<UserModel> signUp({
@@ -49,10 +54,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
         final user = UserModel.fromJson(result);
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(AppConstants.userIdKey, user.id);
-        await prefs.setString(AppConstants.userNameKey, user.name);
-        await prefs.setString(AppConstants.friendCodeKey, user.friendCode);
+        await _localStorage.setInt(AppConstants.userIdKey, user.id);
+        await _localStorage.setString(AppConstants.userNameKey, user.name);
+        await _localStorage.setString(AppConstants.friendCodeKey, user.friendCode);
 
         return user;
       }
@@ -85,31 +89,30 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
         final user = UserModel.fromJson(result);
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(AppConstants.userIdKey, user.id);
-        await prefs.setString(AppConstants.userNameKey, user.name);
-        await prefs.setString(AppConstants.friendCodeKey, user.friendCode);
+        await _localStorage.setInt(AppConstants.userIdKey, user.id);
+        await _localStorage.setString(AppConstants.userNameKey, user.name);
+        await _localStorage.setString(AppConstants.friendCodeKey, user.friendCode);
 
         if (user.guide != null) {
-          await prefs.setInt(AppConstants.guideKey, user.guide!);
+          await _localStorage.setInt(AppConstants.guideKey, user.guide!);
         } else {
-          await prefs.remove(AppConstants.guideKey);
+          await _localStorage.remove(AppConstants.guideKey);
         }
 
         if (user.salary != null) {
-          await prefs.setDouble(AppConstants.salaryKey, user.salary!);
+          await _localStorage.setDouble(AppConstants.salaryKey, user.salary!);
         } else {
-          await prefs.remove(AppConstants.salaryKey);
+          await _localStorage.remove(AppConstants.salaryKey);
         }
 
         final partnerId = result['partner_id'] as int?;
         final partnerName = result['partner_name'] as String?;
         if (partnerId != null && partnerName != null) {
-          await prefs.setInt(AppConstants.partnerIdKey, partnerId);
-          await prefs.setString(AppConstants.partnerNameKey, partnerName);
+          await _localStorage.setInt(AppConstants.partnerIdKey, partnerId);
+          await _localStorage.setString(AppConstants.partnerNameKey, partnerName);
         } else {
-          await prefs.remove(AppConstants.partnerIdKey);
-          await prefs.remove(AppConstants.partnerNameKey);
+          await _localStorage.remove(AppConstants.partnerIdKey);
+          await _localStorage.remove(AppConstants.partnerNameKey);
         }
 
         return user;
@@ -140,9 +143,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           throw AppAuthException(message: result['error']);
         }
 
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setInt(AppConstants.partnerIdKey, result['partner_id'] as int);
-        await prefs.setString(AppConstants.partnerNameKey, result['partner_name'] as String);
+        await _localStorage.setInt(AppConstants.partnerIdKey, result['partner_id'] as int);
+        await _localStorage.setString(AppConstants.partnerNameKey, result['partner_name'] as String);
 
         return result;
       }
@@ -172,9 +174,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.remove(AppConstants.partnerIdKey);
-      await prefs.remove(AppConstants.partnerNameKey);
+      await _localStorage.remove(AppConstants.partnerIdKey);
+      await _localStorage.remove(AppConstants.partnerNameKey);
     } on AppAuthException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -184,10 +185,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
-    final userName = prefs.getString(AppConstants.userNameKey);
-    final friendCode = prefs.getString(AppConstants.friendCodeKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
+    final userName = await _localStorage.getString(AppConstants.userNameKey);
+    final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
 
     if (userId != null && userName != null && friendCode != null) {
       return UserModel(id: userId, name: userName, friendCode: friendCode);
@@ -211,8 +211,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setInt(AppConstants.guideKey, 1);
+      await _localStorage.setInt(AppConstants.guideKey, 1);
     } on AppAuthException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -236,8 +235,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         }
       }
 
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setDouble(AppConstants.salaryKey, salary);
+      await _localStorage.setDouble(AppConstants.salaryKey, salary);
     } on AppAuthException {
       rethrow;
     } on PostgrestException catch (e) {
@@ -246,8 +244,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   Future<int> _getCurrentUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
     if (userId == null) throw AppAuthException(message: 'Usuario no autenticado');
     return userId;
   }

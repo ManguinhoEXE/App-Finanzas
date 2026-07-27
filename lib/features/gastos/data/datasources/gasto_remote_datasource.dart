@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/errors/exceptions.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../models/gasto_model.dart';
 
 abstract class GastoRemoteDataSource {
@@ -19,19 +19,22 @@ abstract class GastoRemoteDataSource {
 
 class GastoRemoteDataSourceImpl implements GastoRemoteDataSource {
   final SupabaseClient _client;
+  final LocalStorageService _localStorage;
 
-  GastoRemoteDataSourceImpl({required SupabaseClient client}) : _client = client;
+  GastoRemoteDataSourceImpl({
+    required SupabaseClient client,
+    required LocalStorageService localStorage,
+  })  : _client = client,
+        _localStorage = localStorage;
 
   Future<int> _getCurrentUserId() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
     if (userId == null) throw AppAuthException(message: 'Usuario no autenticado');
     return userId;
   }
 
   Future<int?> _getPartnerId() async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getInt(AppConstants.partnerIdKey);
+    return await _localStorage.getInt(AppConstants.partnerIdKey);
   }
 
   @override
@@ -40,20 +43,16 @@ class GastoRemoteDataSourceImpl implements GastoRemoteDataSource {
       final userId = await _getCurrentUserId();
       final partnerId = await _getPartnerId();
 
-      // Obtener gastos propios + compartidos del partner
       var query = _client
           .from('expenses')
           .select('*, users!inner(name)');
 
       if (partnerId != null) {
-        // Tiene partner: ver gastos propios + compartidos del partner
         query = query.or('usuario.eq.$userId,and(compartido.eq.true,usuario.eq.$partnerId)');
       } else {
-        // Sin partner: solo ver gastos propios
         query = query.eq('usuario', userId);
       }
 
-      // Filtrado por fechas (opcional)
       if (startDate != null) {
         query = query.gte('fecha', startDate);
       }
@@ -61,12 +60,10 @@ class GastoRemoteDataSourceImpl implements GastoRemoteDataSource {
         query = query.lte('fecha', endDate);
       }
 
-      // Ordenamiento: -fecha, -created_at
       final data = await query.order('fecha', ascending: false)
                              .order('created_at', ascending: false);
 
       return data.map((json) {
-        // Mapear nombre de usuario desde el JOIN
         final userName = json['users']?['name'] ?? '';
         return GastoModel.fromJson({...json, 'usuario_nombre': userName});
       }).toList();
@@ -138,7 +135,6 @@ class GastoRemoteDataSourceImpl implements GastoRemoteDataSource {
     try {
       final userId = await _getCurrentUserId();
 
-      // Verificar que el usuario es el propietario
       final expense = await _client
           .from('expenses')
           .select('usuario')

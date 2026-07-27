@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../app/di/dependency_injection.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -52,20 +54,23 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
   }
 
   Future<void> _loadData() async {
-    final prefs = await SharedPreferences.getInstance();
+    final localStorage = getIt<LocalStorageService>();
+    final friendCode = await localStorage.getString(AppConstants.friendCodeKey);
+    final partnerName = await localStorage.getString(AppConstants.partnerNameKey);
     setState(() {
-      _myFriendCode = prefs.getString(AppConstants.friendCodeKey);
-      _partnerName = prefs.getString(AppConstants.partnerNameKey);
+      _myFriendCode = friendCode;
+      _partnerName = partnerName;
     });
   }
 
   void _copyFriendCode() {
     if (_myFriendCode != null) {
       Clipboard.setData(ClipboardData(text: _myFriendCode!));
+      final l10n = AppLocalizations.of(context);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Código copiado al portapapeles',
+            l10n.friendCodeCopiedMessage,
             style: GoogleFonts.dmSans(),
           ),
           backgroundColor: AppColors.of(context).gold,
@@ -78,11 +83,12 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
 
   void _addPartner() {
     final code = _friendCodeController.text.trim();
+    final l10n = AppLocalizations.of(context);
     if (code.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-            'Ingresa un código de amigo',
+            l10n.friendCodeEmptyValidation,
             style: GoogleFonts.dmSans(),
           ),
           backgroundColor: AppColors.of(context).error,
@@ -104,6 +110,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return BlocConsumer<AuthBloc, AuthState>(
       listenWhen: (prev, curr) {
         if (curr is AuthPartnerLinked && prev is! AuthPartnerLinked) return true;
@@ -115,7 +122,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                'Vinculado con ${state.partnerName}',
+                l10n.friendCodeLinkedMessage(state.partnerName),
                 style: GoogleFonts.dmSans(),
               ),
               backgroundColor: AppColors.of(context).success,
@@ -165,7 +172,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
                   ),
                   const SizedBox(height: 20),
                   Text(
-                    'RED DE AMIGOS',
+                    l10n.friendCodeSheetTitle,
                     style: GoogleFonts.dmSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,
@@ -175,11 +182,11 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
                   ),
                   const SizedBox(height: 24),
                   if (_partnerName != null) ...[
-                    _buildPartnerSection(palette),
+                    _buildPartnerSection(palette, l10n),
                   ] else ...[
-                    _buildMyCodeSection(palette),
+                    _buildMyCodeSection(palette, l10n),
                     const SizedBox(height: 24),
-                    _buildAddFriendSection(palette, isLoading: isLoading),
+                    _buildAddFriendSection(palette, l10n, isLoading: isLoading),
                   ],
                 ],
               ),
@@ -190,7 +197,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
     );
   }
 
-  Widget _buildPartnerSection(dynamic palette) {
+  Widget _buildPartnerSection(dynamic palette, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -216,7 +223,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'TU AMIGO VINCULADO',
+                      l10n.friendCodePartnerLabel,
                       style: GoogleFonts.dmSans(
                         fontSize: 9,
                         fontWeight: FontWeight.w800,
@@ -240,7 +247,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
           ),
         ),
         const SizedBox(height: 16),
-        _buildMyCodeSection(palette),
+        _buildMyCodeSection(palette, l10n),
         const SizedBox(height: 24),
         SizedBox(
           width: double.infinity,
@@ -255,7 +262,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
               ),
             ),
             child: Text(
-              'DESVINCULAR',
+              l10n.friendCodeUnlinkButton,
               style: GoogleFonts.dmSans(
                 fontSize: 11,
                 fontWeight: FontWeight.w800,
@@ -268,12 +275,12 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
     );
   }
 
-  Widget _buildMyCodeSection(dynamic palette) {
+  Widget _buildMyCodeSection(dynamic palette, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'MI CÓDIGO DE AMIGO',
+          l10n.friendCodeMyCodeLabel,
           style: GoogleFonts.dmSans(
             fontSize: 9,
             fontWeight: FontWeight.w800,
@@ -319,7 +326,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
         const SizedBox(height: 8),
         Center(
           child: Text(
-            'Toca para copiar',
+            l10n.friendCodeTapToCopy,
             style: GoogleFonts.dmSans(
               fontSize: 11,
               color: palette.textMuted,
@@ -330,7 +337,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
     );
   }
 
-  Widget _buildAddFriendSection(dynamic palette, {bool isLoading = false}) {
+  Widget _buildAddFriendSection(dynamic palette, AppLocalizations l10n, {bool isLoading = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -341,7 +348,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
         ),
         const SizedBox(height: 24),
         Text(
-          'VINCULAR AMIGO',
+          l10n.friendCodeLinkFriendSection,
           style: GoogleFonts.dmSans(
             fontSize: 9,
             fontWeight: FontWeight.w800,
@@ -351,7 +358,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
         ),
         const SizedBox(height: 12),
         Text(
-          'Ingresa el código de amigo de la persona con quien quieres compartir',
+          l10n.friendCodeLinkFriendDescription,
           style: GoogleFonts.dmSans(
             fontSize: 12,
             color: palette.textMuted,
@@ -406,7 +413,7 @@ class _FriendCodeSheetState extends State<FriendCodeSheet> {
                     ),
                   )
                 : Text(
-                    'VINCULAR',
+                    l10n.friendCodeLinkButton,
                     style: GoogleFonts.dmSans(
                       fontSize: 12,
                       fontWeight: FontWeight.w800,

@@ -1,59 +1,62 @@
 import 'dart:io';
 import 'package:excel/excel.dart';
 import 'package:path_provider/path_provider.dart';
-import '../../features/gastos/domain/entities/gasto.dart';
+
+class ExcelColumn {
+  final String header;
+  final String Function(Map<String, dynamic> row) valueExtractor;
+  final double? width;
+
+  const ExcelColumn({
+    required this.header,
+    required this.valueExtractor,
+    this.width,
+  });
+}
 
 class ExcelGenerator {
   ExcelGenerator._();
 
-  static Future<File> generateGastosExcel({
-    required List<Gasto> gastos,
+  static Future<File> generateExcel({
+    required String sheetName,
+    required List<ExcelColumn> columns,
+    required List<Map<String, dynamic>> rows,
     required String fileName,
+    String? headerColor,
   }) async {
     final excel = Excel.createExcel();
     excel.delete('Sheet1');
-    final sheet = excel['Gastos'];
+    final sheet = excel[sheetName];
 
     final headerStyle = CellStyle(
       bold: true,
       fontSize: 12,
       fontColorHex: ExcelColor.fromHexString('#FFFFFF'),
-      backgroundColorHex: ExcelColor.fromHexString('#D4AF37'),
+      backgroundColorHex: ExcelColor.fromHexString(headerColor ?? '#D4AF37'),
       horizontalAlign: HorizontalAlign.Center,
     );
 
-    final headers = ['Categoria', 'Descripcion', 'Monto', 'Fecha'];
-    for (var i = 0; i < headers.length; i++) {
+    for (var i = 0; i < columns.length; i++) {
       final cell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: i, rowIndex: 0));
-      cell.value = TextCellValue(headers[i]);
+      cell.value = TextCellValue(columns[i].header);
       cell.cellStyle = headerStyle;
     }
 
-    final amountStyle = CellStyle(
-      fontSize: 11,
-    );
-
-    for (var i = 0; i < gastos.length; i++) {
-      final gasto = gastos[i];
+    for (var i = 0; i < rows.length; i++) {
+      final row = rows[i];
       final rowIndex = i + 1;
-
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 0, rowIndex: rowIndex)).value =
-          TextCellValue(gasto.categoria);
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 1, rowIndex: rowIndex)).value =
-          TextCellValue(gasto.descripcion);
-
-      final amountCell = sheet.cell(CellIndex.indexByColumnRow(columnIndex: 2, rowIndex: rowIndex));
-      amountCell.value = DoubleCellValue(gasto.valor);
-      amountCell.cellStyle = amountStyle;
-
-      sheet.cell(CellIndex.indexByColumnRow(columnIndex: 3, rowIndex: rowIndex)).value =
-          TextCellValue(gasto.fecha);
+      for (var j = 0; j < columns.length; j++) {
+        final value = columns[j].valueExtractor(row);
+        sheet.cell(CellIndex.indexByColumnRow(columnIndex: j, rowIndex: rowIndex)).value =
+            TextCellValue(value);
+      }
     }
 
-    sheet.setColumnWidth(0, 20);
-    sheet.setColumnWidth(1, 35);
-    sheet.setColumnWidth(2, 15);
-    sheet.setColumnWidth(3, 15);
+    for (var i = 0; i < columns.length; i++) {
+      if (columns[i].width != null) {
+        sheet.setColumnWidth(i, columns[i].width!);
+      }
+    }
 
     final directory = await getTemporaryDirectory();
     final filePath = '${directory.path}/$fileName.xlsx';

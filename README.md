@@ -9,6 +9,8 @@
 [![Supabase](https://img.shields.io/badge/Supabase-Database-3FCF8E?logo=supabase)](https://supabase.com)
 [![License](https://img.shields.io/badge/License-Private-red)](#licencia)
 
+### [Descargar APK (ultima version)](https://github.com/ManguinhoEXE/App-Finanzas/releases/latest/download/app-release.apk)
+
 </div>
 
 ---
@@ -82,7 +84,7 @@ lib/
 ### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TU_USUARIO/Flutter-Finanzas.git
+git clone https://github.com/ManguinhoEXE/App-Finanzas.git
 cd Flutter-Finanzas
 ```
 
@@ -124,7 +126,18 @@ flutter run
 
 ## Build de release (APK)
 
-Para generar el APK de produccion:
+### Descargar APK pre-compilado
+
+Ve a la pagina de [Releases](https://github.com/ManguinhoEXE/App-Finanzas/releases) y descarga el `app-release.apk`.
+
+Para instalar en tu dispositivo Android:
+
+1. Descarga el `app-release.apk` desde la pagina de releases
+2. Abre el archivo en tu dispositivo
+3. Si es la primera vez, habilita **"Fuentes desconocidas"** en Ajustes > Seguridad
+4. Sigue las instrucciones para completar la instalacion
+
+### Compilar desde el codigo fuente
 
 ```bash
 flutter build apk --release
@@ -204,7 +217,7 @@ feature/
 ## Contacto
 
 - **Autor:** Manguinho
-- **GitHub:** [@TU_USUARIO](https://github.com/TU_USUARIO)
+- **GitHub:** [@ManguinhoEXE](https://github.com/ManguinhoEXE)
 
 ---
 

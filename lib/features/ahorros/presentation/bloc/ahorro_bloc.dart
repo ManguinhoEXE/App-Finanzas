@@ -58,7 +58,7 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     Emitter<AhorroState> emit,
   ) async {
     emit(const AhorroLoading());
-    final result = await getAhorroUseCase(event.id);
+    final result = await getAhorroUseCase(GetAhorroParams(id: event.id));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (ahorro) => emit(AhorroDetailLoaded(ahorro: ahorro)),
@@ -69,14 +69,14 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     AddAhorro event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await createAhorroUseCase(
+    final result = await createAhorroUseCase(CreateAhorroParams(
       name: event.name,
       description: event.description,
       targetAmount: event.targetAmount,
       currency: event.currency,
       deadline: event.deadline.isEmpty ? null : event.deadline,
       isShared: event.isShared,
-    );
+    ));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) => add(const LoadAhorros()),
@@ -87,7 +87,10 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     UpdateAhorro event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await updateAhorroUseCase(event.id, event.data);
+    final result = await updateAhorroUseCase(UpdateAhorroParams(
+      id: event.id,
+      data: event.data,
+    ));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) => add(const LoadAhorros()),
@@ -98,7 +101,7 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     DeleteAhorro event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await deleteAhorroUseCase(event.id);
+    final result = await deleteAhorroUseCase(DeleteAhorroParams(id: event.id));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) => add(const LoadAhorros()),
@@ -109,7 +112,11 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     DepositToAhorro event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await depositUseCase(event.goalId, event.amount, event.description);
+    final result = await depositUseCase(DepositParams(
+      goalId: event.goalId,
+      amount: event.amount,
+      description: event.description,
+    ));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) {
@@ -123,7 +130,11 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     WithdrawFromAhorro event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await withdrawUseCase(event.goalId, event.amount, event.description);
+    final result = await withdrawUseCase(WithdrawParams(
+      goalId: event.goalId,
+      amount: event.amount,
+      description: event.description,
+    ));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) {
@@ -149,7 +160,7 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
       currentTotal = currentState.total;
     }
 
-    final result = await getMovementsUseCase(event.goalId);
+    final result = await getMovementsUseCase(GetMovementsParams(goalId: event.goalId));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (movements) => emit(MovementsLoaded(
@@ -164,7 +175,10 @@ class AhorroBloc extends Bloc<AhorroEvent, AhorroState> {
     AddParticipant event,
     Emitter<AhorroState> emit,
   ) async {
-    final result = await addParticipantUseCase(event.goalId, event.userId);
+    final result = await addParticipantUseCase(AddParticipantParams(
+      goalId: event.goalId,
+      userId: event.userId,
+    ));
     result.fold(
       (failure) => emit(AhorroError(message: failure.message)),
       (_) => emit(const AhorroActionSuccess(message: 'Participante agregado')),

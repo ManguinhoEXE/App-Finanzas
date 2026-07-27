@@ -1,6 +1,6 @@
 ﻿import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_constants.dart';
+import '../../../../core/services/local_storage_service.dart';
 import '../../../../core/usecases/usecase.dart';
 import '../../data/models/user_model.dart';
 import '../../domain/usecases/sign_up_usecase.dart';
@@ -19,6 +19,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final RemovePartnerUseCase removePartnerUseCase;
   final CompleteGuideUseCase completeGuideUseCase;
   final UpdateSalaryUseCase updateSalaryUseCase;
+  final LocalStorageService _localStorage;
 
   AuthBloc({
     required this.signUpUseCase,
@@ -27,7 +28,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.removePartnerUseCase,
     required this.completeGuideUseCase,
     required this.updateSalaryUseCase,
-  }) : super(const AuthInitial()) {
+    required LocalStorageService localStorage,
+  })  : _localStorage = localStorage,
+        super(const AuthInitial()) {
     on<SignUpRequested>(_onSignUpRequested);
     on<SignInRequested>(_onSignInRequested);
     on<AddPartnerRequested>(_onAddPartnerRequested);
@@ -76,7 +79,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    final result = await addPartnerUseCase(event.friendCode);
+    final result = await addPartnerUseCase(AddPartnerParams(friendCode: event.friendCode));
 
     result.fold(
       (failure) => emit(AuthError(message: failure.message, isPartnerError: true)),
@@ -93,37 +96,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     final result = await removePartnerUseCase(const NoParams());
 
-    result.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (_) async {
-        final prefs = await SharedPreferences.getInstance();
-        final userId = prefs.getInt(AppConstants.userIdKey);
-        final userName = prefs.getString(AppConstants.userNameKey);
-        final friendCode = prefs.getString(AppConstants.friendCodeKey);
-
-        if (userId != null && userName != null && friendCode != null) {
-          emit(AuthAuthenticated(
-            user: UserModel(id: userId, name: userName, friendCode: friendCode),
-          ));
-        } else {
-          emit(const AuthUnauthenticated());
-        }
+    final success = result.fold(
+      (failure) {
+        emit(AuthError(message: failure.message));
+        return false;
       },
+      (_) => true,
     );
+
+    if (success) {
+      final userId = await _localStorage.getInt(AppConstants.userIdKey);
+      final userName = await _localStorage.getString(AppConstants.userNameKey);
+      final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
+
+      if (userId != null && userName != null && friendCode != null) {
+        emit(AuthAuthenticated(
+          user: UserModel(id: userId, name: userName, friendCode: friendCode),
+        ));
+      } else {
+        emit(const AuthUnauthenticated());
+      }
+    }
   }
 
   Future<void> _onLogoutRequested(
     LogoutRequested event,
     Emitter<AuthState> emit,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove(AppConstants.userIdKey);
-    await prefs.remove(AppConstants.userNameKey);
-    await prefs.remove(AppConstants.friendCodeKey);
-    await prefs.remove(AppConstants.partnerIdKey);
-    await prefs.remove(AppConstants.partnerNameKey);
-    await prefs.remove(AppConstants.guideKey);
-    await prefs.remove(AppConstants.salaryKey);
+    await _localStorage.remove(AppConstants.userIdKey);
+    await _localStorage.remove(AppConstants.userNameKey);
+    await _localStorage.remove(AppConstants.friendCodeKey);
+    await _localStorage.remove(AppConstants.partnerIdKey);
+    await _localStorage.remove(AppConstants.partnerNameKey);
+    await _localStorage.remove(AppConstants.guideKey);
+    await _localStorage.remove(AppConstants.salaryKey);
     emit(const AuthUnauthenticated());
   }
 
@@ -131,14 +137,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     CheckSessionRequested event,
     Emitter<AuthState> emit,
   ) async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
-    final userName = prefs.getString(AppConstants.userNameKey);
-    final friendCode = prefs.getString(AppConstants.friendCodeKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
+    final userName = await _localStorage.getString(AppConstants.userNameKey);
+    final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
 
     if (userId != null && userName != null && friendCode != null) {
-      final guide = prefs.getInt(AppConstants.guideKey);
-      final salary = prefs.getDouble(AppConstants.salaryKey);
+      final guide = await _localStorage.getInt(AppConstants.guideKey);
+      final salary = await _localStorage.getDouble(AppConstants.salaryKey);
       emit(AuthAuthenticated(
         user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide, salary: salary),
       ));
@@ -158,13 +163,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (_) {},
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setInt(AppConstants.guideKey, 1);
+    await _localStorage.setInt(AppConstants.guideKey, 1);
 
-    final userId = prefs.getInt(AppConstants.userIdKey);
-    final userName = prefs.getString(AppConstants.userNameKey);
-    final friendCode = prefs.getString(AppConstants.friendCodeKey);
-    final salary = prefs.getDouble(AppConstants.salaryKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
+    final userName = await _localStorage.getString(AppConstants.userNameKey);
+    final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
+    final salary = await _localStorage.getDouble(AppConstants.salaryKey);
 
     if (userId != null && userName != null && friendCode != null) {
       emit(AuthAuthenticated(
@@ -184,11 +188,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (_) {},
     );
 
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt(AppConstants.userIdKey);
-    final userName = prefs.getString(AppConstants.userNameKey);
-    final friendCode = prefs.getString(AppConstants.friendCodeKey);
-    final guide = prefs.getInt(AppConstants.guideKey);
+    final userId = await _localStorage.getInt(AppConstants.userIdKey);
+    final userName = await _localStorage.getString(AppConstants.userNameKey);
+    final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
+    final guide = await _localStorage.getInt(AppConstants.guideKey);
 
     if (userId != null && userName != null && friendCode != null) {
       emit(AuthAuthenticated(

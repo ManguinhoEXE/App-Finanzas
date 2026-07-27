@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_input_formatter.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../bloc/ahorro_bloc.dart';
 import '../bloc/ahorro_event.dart';
 
@@ -73,6 +74,7 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
@@ -100,7 +102,7 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'NUEVA META DE AHORRO',
+                  l10n.ahorroCreateTitle,
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -112,31 +114,31 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
                 _buildField(
                   context,
                   controller: _nameController,
-                  label: 'NOMBRE',
-                  hint: 'Ej: Viaje a la playa',
+                  label: l10n.ahorroNameLabel,
+                  hint: l10n.ahorroNameHint,
                   icon: Icons.flag_outlined,
-                  validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                  validator: (v) => v == null || v.isEmpty ? l10n.validationRequired : null,
                 ),
                 const SizedBox(height: 16),
                 _buildField(
                   context,
                   controller: _descriptionController,
-                  label: 'DESCRIPCION',
-                  hint: 'Ahorro para las vacaciones...',
+                  label: l10n.ahorroDescriptionLabel,
+                  hint: l10n.ahorroDescriptionHint,
                   icon: Icons.description_outlined,
                 ),
                 const SizedBox(height: 16),
                 _buildField(
                   context,
                   controller: _targetAmountController,
-                  label: 'MONTO OBJETIVO',
+                  label: l10n.ahorroTargetAmountLabel,
                   hint: '0',
                   icon: Icons.savings_outlined,
                   keyboardType: TextInputType.number,
                   inputFormatters: [CurrencyInputFormatter()],
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Requerido';
-                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return 'Debe ser mayor a 0';
+                    if (v == null || v.isEmpty) return l10n.validationRequired;
+                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return l10n.validationMustBeGreaterThanZero;
                     return null;
                   },
                 ),
@@ -147,9 +149,9 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
                     context,
                     enabled: false,
                     controller: TextEditingController(
-                      text: _deadline.isEmpty ? 'Sin fecha limite' : _deadline,
+                      text: _deadline.isEmpty ? l10n.ahorroNoDeadline : _deadline,
                     ),
-                    label: 'FECHA LIMITE (OPCIONAL)',
+                    label: l10n.ahorroDeadlineOptionalLabel,
                     icon: Icons.calendar_today_outlined,
                   ),
                 ),
@@ -165,7 +167,7 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
                     GestureDetector(
                       onTap: () => setState(() => _isShared = !_isShared),
                       child: Text(
-                        'Meta compartida',
+                        l10n.ahorroSharedGoalLabel,
                         style: GoogleFonts.dmSans(
                           fontSize: 13,
                           color: palette.textSecondary,
@@ -188,7 +190,7 @@ class _CreateAhorroSheetState extends State<CreateAhorroSheet> {
                       ),
                     ),
                     child: Text(
-                      'CREAR META',
+                      l10n.ahorroCreateButton,
                       style: GoogleFonts.dmSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,

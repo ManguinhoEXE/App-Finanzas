@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_input_formatter.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_event.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
@@ -44,6 +45,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
       child: Container(
@@ -71,7 +73,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'AJUSTES',
+                  l10n.settingsTitle,
                   style: GoogleFonts.dmSans(
                     fontSize: 12,
                     fontWeight: FontWeight.w800,
@@ -89,12 +91,12 @@ class _SettingsSheetState extends State<SettingsSheet> {
                     color: palette.textPrimary,
                   ),
                   validator: (v) {
-                    if (v == null || v.isEmpty) return 'Requerido';
-                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return 'Numero invalido';
+                    if (v == null || v.isEmpty) return l10n.validationRequired;
+                    if (CurrencyInputFormatter.parseFormatted(v) <= 0) return l10n.validationInvalidNumber;
                     return null;
                   },
                   decoration: InputDecoration(
-                    labelText: 'SUELDO MENSUAL',
+                    labelText: l10n.settingsSalaryLabel,
                     labelStyle: GoogleFonts.dmSans(
                       fontSize: 10,
                       fontWeight: FontWeight.w800,
@@ -137,7 +139,7 @@ class _SettingsSheetState extends State<SettingsSheet> {
                       ),
                     ),
                     child: Text(
-                      'GUARDAR',
+                      l10n.settingsSaveButton,
                       style: GoogleFonts.dmSans(
                         fontSize: 12,
                         fontWeight: FontWeight.w800,

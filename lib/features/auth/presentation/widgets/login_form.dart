@@ -7,6 +7,7 @@ import '../bloc/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/widgets/aura_logo.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class LoginForm extends StatefulWidget {
   final VoidCallback onGoToRegister;
@@ -44,6 +45,7 @@ class _LoginFormState extends State<LoginForm> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
@@ -54,17 +56,17 @@ class _LoginFormState extends State<LoginForm> {
             children: [
               const AnimatedListItem(index: 0, child: AuraLogo(size: 88)),
               const SizedBox(height: 40),
-              AnimatedListItem(index: 1, child: _buildHeader(palette)),
+              AnimatedListItem(index: 1, child: _buildHeader(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 2, child: _buildNameField(palette)),
+              AnimatedListItem(index: 2, child: _buildNameField(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 3, child: _buildPasswordField(palette)),
+              AnimatedListItem(index: 3, child: _buildPasswordField(palette, l10n)),
               const SizedBox(height: 40),
-              AnimatedListItem(index: 4, child: _buildLoginButton(palette)),
+              AnimatedListItem(index: 4, child: _buildLoginButton(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 5, child: _buildRegisterLink(palette)),
+              AnimatedListItem(index: 5, child: _buildRegisterLink(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 6, child: _buildSecurityHint(palette)),
+              AnimatedListItem(index: 6, child: _buildSecurityHint(palette, l10n)),
               const SizedBox(height: 32),
               AnimatedListItem(index: 7, child: _buildFooter(palette)),
             ],
@@ -74,7 +76,7 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildHeader(dynamic palette) {
+  Widget _buildHeader(dynamic palette, AppLocalizations l10n) {
     return Column(
       children: [
         RichText(
@@ -96,7 +98,7 @@ class _LoginFormState extends State<LoginForm> {
         ),
         const SizedBox(height: 12),
         Text(
-          'RED FINANCIERA PRIVADA',
+          l10n.appTagline.toUpperCase(),
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -108,30 +110,30 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildNameField(dynamic palette) {
+  Widget _buildNameField(dynamic palette, AppLocalizations l10n) {
     return _buildInputField(
       palette: palette,
       controller: _nameController,
-      label: 'Usuario',
-      hint: 'Tu nombre de usuario',
+      label: l10n.loginUsernameLabel,
+      hint: l10n.loginUsernameHint,
       icon: Icons.person_outline,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return 'Ingresa tu nombre de usuario';
+          return l10n.loginUsernameValidationEmpty;
         }
         return null;
       },
     );
   }
 
-  Widget _buildPasswordField(dynamic palette) {
+  Widget _buildPasswordField(dynamic palette, AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: const EdgeInsets.only(left: 4, bottom: 8),
           child: Text(
-            'CONTRASEÑA',
+            l10n.loginPasswordLabel,
             style: GoogleFonts.dmSans(
               fontSize: 10,
               fontWeight: FontWeight.w800,
@@ -149,7 +151,7 @@ class _LoginFormState extends State<LoginForm> {
           ),
           validator: (value) {
             if (value == null || value.isEmpty) {
-              return 'Ingresa tu contraseña';
+              return l10n.loginPasswordValidationEmpty;
             }
             return null;
           },
@@ -222,7 +224,7 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildLoginButton(dynamic palette) {
+  Widget _buildLoginButton(dynamic palette, AppLocalizations l10n) {
     return BlocBuilder<AuthBloc, AuthState>(
       builder: (context, state) {
         return SizedBox(
@@ -250,7 +252,7 @@ class _LoginFormState extends State<LoginForm> {
                     ),
                   )
                 : Text(
-                    'ENTRAR',
+                    l10n.loginButton,
                     style: GoogleFonts.dmSans(
                       fontSize: 13,
                       fontWeight: FontWeight.w800,
@@ -263,19 +265,19 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildRegisterLink(dynamic palette) {
+  Widget _buildRegisterLink(dynamic palette, AppLocalizations l10n) {
     return GestureDetector(
       onTap: widget.onGoToRegister,
       child: RichText(
         text: TextSpan(
-          text: '¿No tienes cuenta? ',
+          text: l10n.loginNoAccountPrefix,
           style: GoogleFonts.dmSans(
             fontSize: 13,
             color: palette.textMuted,
           ),
           children: [
             TextSpan(
-              text: 'Regístrate',
+              text: l10n.loginRegisterLink,
               style: GoogleFonts.dmSans(
                 fontSize: 13,
                 fontWeight: FontWeight.w700,
@@ -288,11 +290,11 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildSecurityHint(dynamic palette) {
+  Widget _buildSecurityHint(dynamic palette, AppLocalizations l10n) {
     return Column(
       children: [
         Text(
-          'CIFRADO DE EXTREMO A EXTREMO',
+          l10n.loginSecurityBadge,
           style: GoogleFonts.dmSans(
             fontSize: 9,
             fontWeight: FontWeight.w800,

@@ -6,6 +6,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/currency_input_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
+import '../../../../core/utils/month_names.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../domain/entities/ahorro.dart';
 import '../bloc/ahorro_bloc.dart';
 import '../bloc/ahorro_event.dart';
@@ -22,6 +24,7 @@ class AhorroCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     final progress = (ahorro.progress / 100).clamp(0.0, 1.0);
     final bloc = context.read<AhorroBloc>();
 
@@ -86,7 +89,7 @@ class AhorroCard extends StatelessWidget {
                         const SizedBox(height: 4),
                         if (ahorro.deadline != null && ahorro.deadline!.isNotEmpty)
                           Text(
-                            'Meta: ${_formatDeadline(ahorro.deadline!)}',
+                            l10n.ahorroCardDeadlineLabel(_formatDeadline(ahorro.deadline!, context)),
                             style: GoogleFonts.dmSans(
                               fontSize: 10,
                               fontWeight: FontWeight.w800,
@@ -151,7 +154,7 @@ class AhorroCard extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Objetivo ${CurrencyFormatter.format(ahorro.targetAmount)}',
+                  l10n.ahorroCardTargetLabel(CurrencyFormatter.format(ahorro.targetAmount)),
                   style: GoogleFonts.dmSans(
                     fontSize: 11,
                     fontWeight: FontWeight.w700,
@@ -166,11 +169,10 @@ class AhorroCard extends StatelessWidget {
     );
   }
 
-  String _formatDeadline(String deadline) {
+  String _formatDeadline(String deadline, BuildContext context) {
     try {
       final date = DateTime.parse(deadline);
-      final months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      return '${months[date.month]} ${date.year}';
+      return '${getMonthAbbreviation(date.month, Localizations.localeOf(context).languageCode)} ${date.year}';
     } catch (_) {
       return deadline;
     }
@@ -234,6 +236,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return BlocBuilder<AhorroBloc, AhorroState>(
       builder: (context, state) {
         final ahorro = _resolveAhorro(state);
@@ -305,7 +308,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('ACTUAL', style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.gold.withValues(alpha: 0.6), letterSpacing: 2)),
+                  Text(l10n.ahorroDetailCurrentLabel, style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.gold.withValues(alpha: 0.6), letterSpacing: 2)),
                   const SizedBox(height: 4),
                   Text(CurrencyFormatter.format(ahorro.currentAmount), style: GoogleFonts.dmSans(fontSize: 18, fontWeight: FontWeight.w800, color: palette.gold)),
                 ],
@@ -313,7 +316,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('RESTANTE', style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.textMuted, letterSpacing: 2)),
+                  Text(l10n.ahorroDetailRemainingLabel, style: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.textMuted, letterSpacing: 2)),
                   const SizedBox(height: 4),
                   Text(CurrencyFormatter.format(ahorro.remainingAmount), style: GoogleFonts.dmSans(fontSize: 18, fontWeight: FontWeight.w800, color: palette.textPrimary)),
                 ],
@@ -325,18 +328,18 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
             Row(
               children: [
                 Expanded(
-                  child: _buildActionBtn(context, label: 'DEPOSITAR', icon: Icons.add, onTap: () => setState(() => _formMode = _FormMode.deposit)),
+                  child: _buildActionBtn(context, label: l10n.ahorroDepositButton, icon: Icons.add, onTap: () => setState(() => _formMode = _FormMode.deposit)),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: _buildActionBtn(context, label: 'RETIRAR', icon: Icons.remove, onTap: ahorro.currentAmount > 0 ? () => setState(() => _formMode = _FormMode.withdraw) : null, outlined: true),
+                  child: _buildActionBtn(context, label: l10n.ahorroWithdrawButton, icon: Icons.remove, onTap: ahorro.currentAmount > 0 ? () => setState(() => _formMode = _FormMode.withdraw) : null, outlined: true),
                 ),
               ],
             ),
           if (_formMode != _FormMode.none) _buildInlineForm(context),
           const SizedBox(height: 16),
           Text(
-            'MOVIMIENTOS',
+            l10n.ahorroMovementsSection,
             style: GoogleFonts.dmSans(
               fontSize: 11,
               fontWeight: FontWeight.w800,
@@ -355,7 +358,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
                   if (state.movements.isEmpty) {
                     return Center(
                       child: Text(
-                        'Sin movimientos',
+                        l10n.ahorroNoMovements,
                         style: GoogleFonts.dmSans(fontSize: 13, color: palette.textMuted),
                       ),
                     );
@@ -397,7 +400,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    isDeposit ? 'Deposito' : 'Retiro',
+                                    isDeposit ? l10n.ahorroMovementDeposit : l10n.ahorroMovementWithdraw,
                                     style: GoogleFonts.dmSans(fontSize: 13, fontWeight: FontWeight.w700, color: palette.textPrimary),
                                   ),
                                   if ((m['description'] ?? '').isNotEmpty)
@@ -407,7 +410,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
                                     ),
                                   if (m['created_at'] != null)
                                     Text(
-                                      _formatMovementDate(m['created_at']),
+                                      _formatMovementDate(m['created_at'], context),
                                       style: GoogleFonts.dmSans(fontSize: 10, color: palette.gold.withValues(alpha: 0.5)),
                                     ),
                                 ],
@@ -448,12 +451,11 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
     return widget.ahorro;
   }
 
-  String _formatMovementDate(String? dateStr) {
+  String _formatMovementDate(String? dateStr, BuildContext context) {
     if (dateStr == null || dateStr.isEmpty) return '';
     try {
       final date = DateTime.parse(dateStr);
-      final months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
-      return '${date.day} ${months[date.month]} ${date.year}';
+      return '${date.day} ${getMonthAbbreviation(date.month, Localizations.localeOf(context).languageCode)} ${date.year}';
     } catch (_) {
       return dateStr;
     }
@@ -461,6 +463,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
 
   Widget _buildInlineForm(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     final isDeposit = _formMode == _FormMode.deposit;
     return Container(
       padding: const EdgeInsets.all(16),
@@ -477,7 +480,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                isDeposit ? 'DEPOSITAR' : 'RETIRAR',
+                isDeposit ? l10n.ahorroDepositButton : l10n.ahorroWithdrawButton,
                 style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w800, color: palette.gold, letterSpacing: 2),
               ),
               GestureDetector(
@@ -491,9 +494,9 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
             ],
           ),
           const SizedBox(height: 12),
-          _buildField(context, controller: _amountController, label: 'MONTO', icon: Icons.attach_money, keyboardType: TextInputType.number, inputFormatters: [CurrencyInputFormatter()]),
+          _buildField(context, controller: _amountController, label: l10n.ahorroAmountLabel, icon: Icons.attach_money, keyboardType: TextInputType.number, inputFormatters: [CurrencyInputFormatter()]),
           const SizedBox(height: 12),
-          _buildField(context, controller: _descController, label: 'DESCRIPCION (OPCIONAL)', icon: Icons.description_outlined),
+          _buildField(context, controller: _descController, label: l10n.ahorroDescriptionOptionalLabel, icon: Icons.description_outlined),
           const SizedBox(height: 12),
           SizedBox(
             width: double.infinity,
@@ -506,7 +509,7 @@ class _AhorroDetailSheetState extends State<_AhorroDetailSheet> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
               child: Text(
-                isDeposit ? 'DEPOSITAR' : 'RETIRAR',
+                isDeposit ? l10n.ahorroDepositButton : l10n.ahorroWithdrawButton,
                 style: GoogleFonts.dmSans(fontSize: 11, fontWeight: FontWeight.w800, letterSpacing: 2),
               ),
             ),

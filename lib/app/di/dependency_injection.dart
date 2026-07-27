@@ -1,25 +1,9 @@
 ﻿import 'package:get_it/get_it.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../features/auth/domain/usecases/sign_up_usecase.dart';
-import '../../features/auth/domain/usecases/sign_in_usecase.dart';
-import '../../features/auth/domain/usecases/add_partner_usecase.dart';
-import '../../features/auth/domain/usecases/remove_partner_usecase.dart';
-import '../../features/auth/domain/usecases/complete_guide_usecase.dart';
-import '../../features/auth/domain/usecases/update_salary_usecase.dart';
-import '../../features/auth/domain/repositories/auth_repository.dart';
-import '../../features/auth/data/datasources/auth_remote_datasource.dart';
-import '../../features/auth/data/repositories/auth_repository_impl.dart';
-import '../../features/gastos/presentation/bloc/gasto_bloc.dart';
-import '../../features/gastos/domain/usecases/gasto_usecases.dart';
-import '../../features/gastos/domain/repositories/gasto_repository.dart';
-import '../../features/gastos/data/datasources/gasto_remote_datasource.dart';
-import '../../features/gastos/data/repositories/gasto_repository_impl.dart';
-import '../../features/ahorros/presentation/bloc/ahorro_bloc.dart';
-import '../../features/ahorros/domain/usecases/ahorro_usecases.dart';
-import '../../features/ahorros/domain/repositories/ahorro_repository.dart';
-import '../../features/ahorros/data/datasources/ahorro_remote_datasource.dart';
-import '../../features/ahorros/data/repositories/ahorro_repository_impl.dart';
+import '../../core/services/services.dart';
+import '../../features/auth/auth.dart';
+import '../../features/gastos/gastos.dart';
+import '../../features/ahorros/ahorros.dart';
 
 final getIt = GetIt.instance;
 
@@ -28,9 +12,14 @@ void setupDependencies() {
   final supabaseClient = Supabase.instance.client;
   getIt.registerLazySingleton<SupabaseClient>(() => supabaseClient);
 
+  // Core - Local Storage
+  getIt.registerLazySingleton<LocalStorageService>(
+    () => getIt<SharedPreferencesService>(),
+  );
+
   // Auth
   getIt.registerLazySingleton<AuthRemoteDataSource>(
-    () => AuthRemoteDataSourceImpl(client: getIt()),
+    () => AuthRemoteDataSourceImpl(client: getIt(), localStorage: getIt()),
   );
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(remoteDataSource: getIt()),
@@ -49,12 +38,13 @@ void setupDependencies() {
       removePartnerUseCase: getIt(),
       completeGuideUseCase: getIt(),
       updateSalaryUseCase: getIt(),
+      localStorage: getIt(),
     ),
   );
 
   // Gastos
   getIt.registerLazySingleton<GastoRemoteDataSource>(
-    () => GastoRemoteDataSourceImpl(client: getIt()),
+    () => GastoRemoteDataSourceImpl(client: getIt(), localStorage: getIt()),
   );
   getIt.registerLazySingleton<GastoRepository>(
     () => GastoRepositoryImpl(remoteDataSource: getIt()),
@@ -74,7 +64,7 @@ void setupDependencies() {
 
   // Ahorros
   getIt.registerLazySingleton<AhorroRemoteDataSource>(
-    () => AhorroRemoteDataSourceImpl(client: getIt()),
+    () => AhorroRemoteDataSourceImpl(client: getIt(), localStorage: getIt()),
   );
   getIt.registerLazySingleton<AhorroRepository>(
     () => AhorroRepositoryImpl(remoteDataSource: getIt()),

@@ -8,3 +8,7 @@ export 'presentation/bloc/gasto_bloc.dart';
 export 'presentation/bloc/gasto_event.dart';
 export 'presentation/bloc/gasto_state.dart';
 export 'presentation/pages/gastos_page.dart';
+export 'presentation/widgets/gasto_card.dart';
+export 'presentation/widgets/create_gasto_sheet.dart';
+export 'presentation/widgets/export_gastos_sheet.dart';
+export 'presentation/widgets/settings_sheet.dart';

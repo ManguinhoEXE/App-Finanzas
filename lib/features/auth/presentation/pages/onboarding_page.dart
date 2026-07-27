@@ -1,12 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../theme/app_colors.dart';
-import '../utils/slide_route_builder.dart';
-import '../../features/auth/presentation/bloc/auth_bloc.dart';
-import '../../features/auth/presentation/bloc/auth_event.dart';
-import '../../features/auth/presentation/bloc/auth_state.dart';
-import '../../app/app.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../bloc/auth_bloc.dart';
+import '../bloc/auth_event.dart';
+import '../bloc/auth_state.dart';
 
 class OnboardingPage extends StatefulWidget {
   const OnboardingPage({super.key});
@@ -19,29 +19,6 @@ class _OnboardingPageState extends State<OnboardingPage> {
   final _pageController = PageController();
   int _currentPage = 0;
 
-  final _pages = const [
-    _OnboardingData(
-      icon: Icons.account_balance_wallet_outlined,
-      title: 'Bienvenido a Aura',
-      description: 'Tu asistente financiero personal. Controla tus gastos y ahorra para alcanzar tus metas.',
-    ),
-    _OnboardingData(
-      icon: Icons.receipt_long_outlined,
-      title: 'Gestiona tus Gastos',
-      description: 'Registra cada gasto, organízalos por categoría y revisa tu flujo financiero mes a mes.',
-    ),
-    _OnboardingData(
-      icon: Icons.savings_outlined,
-      title: 'Alcanza tus Metas',
-      description: 'Crea metas de ahorro, deposita fondos y visualiza tu progreso hacia tus objetivos.',
-    ),
-    _OnboardingData(
-      icon: Icons.people_outline,
-      title: 'Comparte con Amigos',
-      description: 'Vincula tu cuenta con amigos para compartir metas de ahorro juntos.',
-    ),
-  ];
-
   @override
   void dispose() {
     _pageController.dispose();
@@ -49,7 +26,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
   }
 
   void _nextPage() {
-    if (_currentPage < _pages.length - 1) {
+    if (_currentPage < 3) {
       _pageController.nextPage(
         duration: const Duration(milliseconds: 350),
         curve: Curves.easeInOut,
@@ -66,6 +43,31 @@ class _OnboardingPageState extends State<OnboardingPage> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
+
+    final pages = [
+      _OnboardingData(
+        icon: Icons.account_balance_wallet_outlined,
+        title: l10n.onboardingPage1Title,
+        description: l10n.onboardingPage1Description,
+      ),
+      _OnboardingData(
+        icon: Icons.receipt_long_outlined,
+        title: l10n.onboardingPage2Title,
+        description: l10n.onboardingPage2Description,
+      ),
+      _OnboardingData(
+        icon: Icons.savings_outlined,
+        title: l10n.onboardingPage3Title,
+        description: l10n.onboardingPage3Description,
+      ),
+      _OnboardingData(
+        icon: Icons.people_outline,
+        title: l10n.onboardingPage4Title,
+        description: l10n.onboardingPage4Description,
+      ),
+    ];
+
     return BlocListener<AuthBloc, AuthState>(
       listenWhen: (prev, curr) {
         if (curr is AuthAuthenticated && curr.user.guide != null) return true;
@@ -73,10 +75,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       },
       listener: (context, state) {
         if (state is AuthAuthenticated) {
-          Navigator.of(context).pushAndRemoveUntil(
-            SlideRouteBuilder(page: const HomePage()),
-            (route) => false,
-          );
+          context.go('/gastos');
         }
       },
       child: Scaffold(
@@ -87,10 +86,10 @@ class _OnboardingPageState extends State<OnboardingPage> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: _pages.length,
+                  itemCount: pages.length,
                   onPageChanged: (index) => setState(() => _currentPage = index),
                   itemBuilder: (context, index) {
-                    final page = _pages[index];
+                    final page = pages[index];
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Column(
@@ -146,7 +145,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(
-                        _pages.length,
+                        pages.length,
                         (index) => AnimatedContainer(
                           duration: const Duration(milliseconds: 300),
                           margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -176,9 +175,9 @@ class _OnboardingPageState extends State<OnboardingPage> {
                           elevation: 0,
                         ),
                         child: Text(
-                          _currentPage == _pages.length - 1
-                              ? 'EMPEZAR'
-                              : 'SIGUIENTE',
+                          _currentPage == pages.length - 1
+                              ? l10n.onboardingStartButton
+                              : l10n.onboardingNextButton,
                           style: GoogleFonts.dmSans(
                             fontSize: 14,
                             fontWeight: FontWeight.w800,

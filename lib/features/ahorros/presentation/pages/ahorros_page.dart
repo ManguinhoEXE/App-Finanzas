@@ -1,5 +1,6 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/ahorro_bloc.dart';
 import '../bloc/ahorro_event.dart';
@@ -15,11 +16,10 @@ import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/widgets/feedback_button.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class AhorrosPage extends StatefulWidget {
-  final VoidCallback? onSwitchModule;
-
-  const AhorrosPage({super.key, this.onSwitchModule});
+  const AhorrosPage({super.key});
 
   @override
   State<AhorrosPage> createState() => _AhorrosPageState();
@@ -35,6 +35,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
@@ -126,12 +127,13 @@ class _AhorrosPageState extends State<AhorrosPage> {
 
   Widget _buildHeader(double total) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Column(
       children: [
         _buildModuleSwitch(),
         const SizedBox(height: 36),
         Text(
-          'ACTIVOS AHORRADOS',
+          l10n.ahorrosTotalLabel,
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -178,6 +180,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
 
   Widget _buildModuleSwitch() {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -223,8 +226,8 @@ class _AhorrosPageState extends State<AhorrosPage> {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _buildSwitchOption(context, 'Gastos', false),
-              _buildSwitchOption(context, 'Ahorros', true),
+              _buildSwitchOption(context, l10n.gastosModuleTab, false),
+              _buildSwitchOption(context, l10n.ahorrosModuleTab, true),
             ],
           ),
         ),
@@ -239,7 +242,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
     return GestureDetector(
       onTap: () {
         if (!active) {
-          widget.onSwitchModule?.call();
+          context.go('/gastos');
         }
       },
       child: AnimatedContainer(
@@ -273,6 +276,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
   }
 
   Widget _buildActionGrid(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Row(
@@ -280,7 +284,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
         children: [
           _buildActionItem(
               icon: Icons.flag_outlined,
-              label: 'Nueva Meta',
+              label: l10n.ahorrosNewGoalButton,
               onTap: () {
                 final bloc = context.read<AhorroBloc>();
                 showModalBottomSheet(
@@ -336,13 +340,14 @@ class _AhorrosPageState extends State<AhorrosPage> {
 
   Widget _buildList(BuildContext context, List ahorros) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Metas Activas',
+            l10n.ahorrosActiveGoalsTitle,
             style: GoogleFonts.dmSans(
               fontSize: 20,
               fontWeight: FontWeight.w700,
@@ -370,6 +375,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
 
   Widget _buildEmpty() {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: AnimatedOpacity(
         opacity: 1,
@@ -384,7 +390,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
             ),
             const SizedBox(height: 16),
             Text(
-              'No hay metas de ahorro',
+              l10n.ahorrosEmptyMessage,
               style: GoogleFonts.dmSans(
                 fontSize: 14,
                 color: palette.textMuted,
@@ -398,6 +404,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
 
   Widget _buildError(BuildContext context, String message) {
     final palette = AppColors.of(context);
+    final l10n = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -410,7 +417,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
             onPressed: () {
               context.read<AhorroBloc>().add(const LoadAhorros());
             },
-            child: const Text('Reintentar'),
+            child: Text(l10n.retryButton),
           ),
         ],
       ),
