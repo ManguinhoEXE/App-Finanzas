@@ -22,6 +22,8 @@ abstract class AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser();
 
   Future<void> completeGuide();
+
+  Future<void> updateSalary(double salary);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -92,6 +94,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           await prefs.setInt(AppConstants.guideKey, user.guide!);
         } else {
           await prefs.remove(AppConstants.guideKey);
+        }
+
+        if (user.salary != null) {
+          await prefs.setDouble(AppConstants.salaryKey, user.salary!);
+        } else {
+          await prefs.remove(AppConstants.salaryKey);
         }
 
         final partnerId = result['partner_id'] as int?;
@@ -205,6 +213,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       final prefs = await SharedPreferences.getInstance();
       await prefs.setInt(AppConstants.guideKey, 1);
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    }
+  }
+
+  @override
+  Future<void> updateSalary(double salary) async {
+    try {
+      final userId = await _getCurrentUserId();
+
+      final result = await _client.rpc('sp_update_salary', params: {
+        'p_user_id': userId,
+        'p_salary': salary,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(AppConstants.salaryKey, salary);
     } on AppAuthException {
       rethrow;
     } on PostgrestException catch (e) {

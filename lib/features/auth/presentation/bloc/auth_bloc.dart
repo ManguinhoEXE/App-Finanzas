@@ -8,6 +8,7 @@ import '../../domain/usecases/sign_in_usecase.dart';
 import '../../domain/usecases/add_partner_usecase.dart';
 import '../../domain/usecases/remove_partner_usecase.dart';
 import '../../domain/usecases/complete_guide_usecase.dart';
+import '../../domain/usecases/update_salary_usecase.dart';
 import 'auth_event.dart';
 import 'auth_state.dart';
 
@@ -17,6 +18,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AddPartnerUseCase addPartnerUseCase;
   final RemovePartnerUseCase removePartnerUseCase;
   final CompleteGuideUseCase completeGuideUseCase;
+  final UpdateSalaryUseCase updateSalaryUseCase;
 
   AuthBloc({
     required this.signUpUseCase,
@@ -24,6 +26,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.addPartnerUseCase,
     required this.removePartnerUseCase,
     required this.completeGuideUseCase,
+    required this.updateSalaryUseCase,
   }) : super(const AuthInitial()) {
     on<SignUpRequested>(_onSignUpRequested);
     on<SignInRequested>(_onSignInRequested);
@@ -32,6 +35,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<LogoutRequested>(_onLogoutRequested);
     on<CheckSessionRequested>(_onCheckSessionRequested);
     on<CompleteGuideRequested>(_onCompleteGuideRequested);
+    on<UpdateSalaryRequested>(_onUpdateSalaryRequested);
   }
 
   Future<void> _onSignUpRequested(
@@ -119,6 +123,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await prefs.remove(AppConstants.partnerIdKey);
     await prefs.remove(AppConstants.partnerNameKey);
     await prefs.remove(AppConstants.guideKey);
+    await prefs.remove(AppConstants.salaryKey);
     emit(const AuthUnauthenticated());
   }
 
@@ -133,8 +138,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     if (userId != null && userName != null && friendCode != null) {
       final guide = prefs.getInt(AppConstants.guideKey);
+      final salary = prefs.getDouble(AppConstants.salaryKey);
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide),
+        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide, salary: salary),
       ));
     } else {
       emit(const AuthUnauthenticated());
@@ -158,10 +164,35 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userId = prefs.getInt(AppConstants.userIdKey);
     final userName = prefs.getString(AppConstants.userNameKey);
     final friendCode = prefs.getString(AppConstants.friendCodeKey);
+    final salary = prefs.getDouble(AppConstants.salaryKey);
 
     if (userId != null && userName != null && friendCode != null) {
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: 1),
+        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: 1, salary: salary),
+      ));
+    }
+  }
+
+  Future<void> _onUpdateSalaryRequested(
+    UpdateSalaryRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    final result = await updateSalaryUseCase(UpdateSalaryParams(salary: event.salary));
+
+    result.fold(
+      (failure) {},
+      (_) {},
+    );
+
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt(AppConstants.userIdKey);
+    final userName = prefs.getString(AppConstants.userNameKey);
+    final friendCode = prefs.getString(AppConstants.friendCodeKey);
+    final guide = prefs.getInt(AppConstants.guideKey);
+
+    if (userId != null && userName != null && friendCode != null) {
+      emit(AuthAuthenticated(
+        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide, salary: event.salary),
       ));
     }
   }

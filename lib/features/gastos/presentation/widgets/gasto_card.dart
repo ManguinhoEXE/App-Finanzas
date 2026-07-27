@@ -134,6 +134,13 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
   late String _fecha;
   late bool _compartido;
 
+  static const _predefinedCategories = [
+    'Transporte',
+    'Entretenimiento',
+    'Comida',
+    'Vivienda',
+  ];
+
   @override
   void initState() {
     super.initState();
@@ -230,7 +237,73 @@ class _EditGastoSheetState extends State<_EditGastoSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              _buildField(context, controller: _categoriaController, label: 'CATEGORIA', icon: Icons.category_outlined),
+              Autocomplete<String>(
+                initialValue: TextEditingValue(text: _categoriaController.text),
+                optionsBuilder: (textEditingValue) {
+                  final input = textEditingValue.text.toLowerCase();
+                  if (input.isEmpty) return _predefinedCategories;
+                  return _predefinedCategories
+                      .where((cat) => cat.toLowerCase().contains(input))
+                      .toList();
+                },
+                onSelected: (value) {
+                  _categoriaController.text = value;
+                },
+                fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                  controller.text = _categoriaController.text;
+                  controller.selection = _categoriaController.selection;
+                  return TextFormField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    onChanged: (v) => _categoriaController.text = v,
+                    style: GoogleFonts.dmSans(fontSize: 14, color: palette.textPrimary),
+                    decoration: InputDecoration(
+                      labelText: 'CATEGORIA',
+                      hintText: 'Selecciona o escribe una...',
+                      labelStyle: GoogleFonts.dmSans(fontSize: 10, fontWeight: FontWeight.w800, color: palette.gold.withValues(alpha: 0.6), letterSpacing: 1.5),
+                      prefixIcon: Icon(Icons.category_outlined, color: palette.gold, size: 20),
+                      filled: true,
+                      fillColor: palette.backgroundElevated,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: palette.gold.withValues(alpha: 0.12))),
+                      enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: palette.gold.withValues(alpha: 0.12))),
+                      focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(14), borderSide: BorderSide(color: palette.gold, width: 1.5)),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    ),
+                  );
+                },
+                optionsViewBuilder: (context, onSelected, options) {
+                  return Align(
+                    alignment: Alignment.topLeft,
+                    child: Material(
+                      elevation: 8,
+                      borderRadius: BorderRadius.circular(14),
+                      color: palette.backgroundElevated,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 200),
+                        child: ListView.builder(
+                          padding: const EdgeInsets.symmetric(vertical: 8),
+                          shrinkWrap: true,
+                          itemCount: options.length,
+                          itemBuilder: (context, index) {
+                            final option = options.elementAt(index);
+                            return InkWell(
+                              onTap: () => onSelected(option),
+                              borderRadius: BorderRadius.circular(10),
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                child: Text(
+                                  option,
+                                  style: GoogleFonts.dmSans(fontSize: 13, color: palette.textPrimary),
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                  );
+                },
+              ),
               const SizedBox(height: 16),
               _buildField(context, controller: _descripcionController, label: 'DESCRIPCION', icon: Icons.description_outlined),
               const SizedBox(height: 16),

@@ -20,4 +20,6 @@ abstract class AuthRepository {
   Future<User?> getCurrentUser();
 
   Future<Either<Failure, void>> completeGuide();
+
+  Future<Either<Failure, void>> updateSalary(double salary);
 }

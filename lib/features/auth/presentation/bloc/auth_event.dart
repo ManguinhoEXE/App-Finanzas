@@ -57,3 +57,12 @@ class CheckSessionRequested extends AuthEvent {
 class CompleteGuideRequested extends AuthEvent {
   const CompleteGuideRequested();
 }
+
+class UpdateSalaryRequested extends AuthEvent {
+  final double salary;
+
+  const UpdateSalaryRequested({required this.salary});
+
+  @override
+  List<Object> get props => [salary];
+}

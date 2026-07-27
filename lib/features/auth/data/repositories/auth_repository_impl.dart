@@ -90,4 +90,18 @@ class AuthRepositoryImpl implements AuthRepository {
       return Left(ServerFailure(message: 'Error inesperado: $e'));
     }
   }
+
+  @override
+  Future<Either<Failure, void>> updateSalary(double salary) async {
+    try {
+      await remoteDataSource.updateSalary(salary);
+      return const Right(null);
+    } on AppAuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Error inesperado: $e'));
+    }
+  }
 }

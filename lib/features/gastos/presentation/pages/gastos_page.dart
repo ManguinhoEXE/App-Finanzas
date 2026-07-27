@@ -9,13 +9,14 @@ import '../widgets/create_gasto_sheet.dart';
 import '../widgets/export_gastos_sheet.dart';
 import '../../../auth/presentation/widgets/friend_code_sheet.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
-
+import '../../../auth/presentation/bloc/auth_state.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/widgets/feedback_button.dart';
+import '../widgets/settings_sheet.dart';
 
 class GastosPage extends StatefulWidget {
   final VoidCallback? onSwitchModule;
@@ -123,6 +124,37 @@ class _GastosPageState extends State<GastosPage> {
                   right: 24,
                   child: FeedbackButton(),
                 ),
+                Positioned(
+                  bottom: 100,
+                  left: 24,
+                  child: GestureDetector(
+                    onTap: () {
+                      showModalBottomSheet(
+                        context: context,
+                        isScrollControlled: true,
+                        backgroundColor: Colors.transparent,
+                        builder: (_) => BlocProvider<AuthBloc>.value(
+                          value: context.read<AuthBloc>(),
+                          child: const SettingsSheet(),
+                        ),
+                      );
+                    },
+                    child: Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: palette.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: palette.gold.withValues(alpha: 0.2)),
+                      ),
+                      child: Icon(
+                        Icons.settings_outlined,
+                        color: palette.gold,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ),
               ],
             );
           },
@@ -192,12 +224,29 @@ class _GastosPageState extends State<GastosPage> {
     final months = ['', 'Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
     final monthName = '${months[_selectedMonth.month]} ${_selectedMonth.year}';
 
+    final authState = context.watch<AuthBloc>().state;
+    final double salary = (authState is AuthAuthenticated && authState.user.salary != null)
+        ? authState.user.salary!
+        : 0.0;
+    final double disponible = salary - total;
+
     return Column(
       children: [
         _buildModuleSwitch(),
         const SizedBox(height: 24),
         _buildMonthSelector(monthName),
         const SizedBox(height: 20),
+        if (salary > 0) ...[
+          Text(
+            CurrencyFormatter.format(salary),
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: palette.textMuted,
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
         Text(
           'GASTOS TOTALES',
           style: GoogleFonts.dmSans(
@@ -239,6 +288,17 @@ class _GastosPageState extends State<GastosPage> {
             ),
           ),
         ),
+        if (salary > 0) ...[
+          const SizedBox(height: 16),
+          Text(
+            CurrencyFormatter.format(disponible),
+            style: GoogleFonts.dmSans(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: disponible >= 0 ? palette.textMuted : palette.error,
+            ),
+          ),
+        ],
         const SizedBox(height: 28),
       ],
     );

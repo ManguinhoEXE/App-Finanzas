@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -21,6 +21,13 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
   final _valorController = TextEditingController();
   String _fecha = DateTime.now().toIso8601String().substring(0, 10);
   bool _compartido = false;
+
+  static const _predefinedCategories = [
+    'Transporte',
+    'Entretenimiento',
+    'Comida',
+    'Vivienda',
+  ];
 
   @override
   void dispose() {
@@ -109,13 +116,97 @@ class _CreateGastoSheetState extends State<CreateGastoSheet> {
                   ),
                 ),
                 const SizedBox(height: 24),
-                _buildField(
-                  context,
-                  controller: _categoriaController,
-                  label: 'CATEGORIA',
-                  hint: 'Ej: Alimentacion',
-                  icon: Icons.category_outlined,
-                  validator: (v) => v == null || v.isEmpty ? 'Requerido' : null,
+                Autocomplete<String>(
+                  initialValue: TextEditingValue(text: _categoriaController.text),
+                  optionsBuilder: (textEditingValue) {
+                    final input = textEditingValue.text.toLowerCase();
+                    if (input.isEmpty) return _predefinedCategories;
+                    return _predefinedCategories
+                        .where((cat) => cat.toLowerCase().contains(input))
+                        .toList();
+                  },
+                  onSelected: (value) {
+                    _categoriaController.text = value;
+                  },
+                  fieldViewBuilder: (context, controller, focusNode, onSubmitted) {
+                    controller.text = _categoriaController.text;
+                    controller.selection = _categoriaController.selection;
+                    return TextFormField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      validator: (v) => v == null || v.trim().isEmpty ? 'Requerido' : null,
+                      onChanged: (v) => _categoriaController.text = v,
+                      style: GoogleFonts.dmSans(
+                        fontSize: 14,
+                        color: palette.textPrimary,
+                      ),
+                      decoration: InputDecoration(
+                        labelText: 'CATEGORIA',
+                        hintText: 'Selecciona o escribe una...',
+                        labelStyle: GoogleFonts.dmSans(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w800,
+                          color: palette.gold.withValues(alpha: 0.6),
+                          letterSpacing: 1.5,
+                        ),
+                        prefixIcon: Icon(Icons.category_outlined, color: palette.gold, size: 20),
+                        filled: true,
+                        fillColor: palette.backgroundElevated,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: palette.gold.withValues(alpha: 0.12)),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: palette.gold.withValues(alpha: 0.12)),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: palette.gold, width: 1.5),
+                        ),
+                        errorBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(14),
+                          borderSide: BorderSide(color: palette.error),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      ),
+                    );
+                  },
+                  optionsViewBuilder: (context, onSelected, options) {
+                    return Align(
+                      alignment: Alignment.topLeft,
+                      child: Material(
+                        elevation: 8,
+                        borderRadius: BorderRadius.circular(14),
+                        color: palette.backgroundElevated,
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxHeight: 200),
+                          child: ListView.builder(
+                            padding: const EdgeInsets.symmetric(vertical: 8),
+                            shrinkWrap: true,
+                            itemCount: options.length,
+                            itemBuilder: (context, index) {
+                              final option = options.elementAt(index);
+                              return InkWell(
+                                onTap: () => onSelected(option),
+                                borderRadius: BorderRadius.circular(10),
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  child: Text(
+                                    option,
+                                    style: GoogleFonts.dmSans(
+                                      fontSize: 13,
+                                      color: palette.textPrimary,
+                                    ),
+                                  ),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 16),
                 _buildField(

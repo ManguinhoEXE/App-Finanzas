@@ -6,6 +6,7 @@ import '../../features/auth/domain/usecases/sign_in_usecase.dart';
 import '../../features/auth/domain/usecases/add_partner_usecase.dart';
 import '../../features/auth/domain/usecases/remove_partner_usecase.dart';
 import '../../features/auth/domain/usecases/complete_guide_usecase.dart';
+import '../../features/auth/domain/usecases/update_salary_usecase.dart';
 import '../../features/auth/domain/repositories/auth_repository.dart';
 import '../../features/auth/data/datasources/auth_remote_datasource.dart';
 import '../../features/auth/data/repositories/auth_repository_impl.dart';
@@ -39,6 +40,7 @@ void setupDependencies() {
   getIt.registerLazySingleton(() => AddPartnerUseCase(getIt()));
   getIt.registerLazySingleton(() => RemovePartnerUseCase(getIt()));
   getIt.registerLazySingleton(() => CompleteGuideUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateSalaryUseCase(getIt()));
   getIt.registerFactory(
     () => AuthBloc(
       signUpUseCase: getIt(),
@@ -46,6 +48,7 @@ void setupDependencies() {
       addPartnerUseCase: getIt(),
       removePartnerUseCase: getIt(),
       completeGuideUseCase: getIt(),
+      updateSalaryUseCase: getIt(),
     ),
   );
 

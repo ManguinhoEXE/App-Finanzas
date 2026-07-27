@@ -8,6 +8,7 @@
   static const String partnerIdKey = 'partner_id';
   static const String partnerNameKey = 'partner_name';
   static const String guideKey = 'guide';
+  static const String salaryKey = 'salary';
 
   // Routes
   static const String loginRoute = '/login';
