@@ -60,9 +60,10 @@ class CompleteGuideRequested extends AuthEvent {
 
 class UpdateSalaryRequested extends AuthEvent {
   final double salary;
+  final String salaryType;
 
-  const UpdateSalaryRequested({required this.salary});
+  const UpdateSalaryRequested({required this.salary, this.salaryType = 'fixed'});
 
   @override
-  List<Object> get props => [salary];
+  List<Object> get props => [salary, salaryType];
 }

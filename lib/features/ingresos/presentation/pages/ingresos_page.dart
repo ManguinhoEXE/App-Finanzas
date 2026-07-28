@@ -1,48 +1,40 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../bloc/gasto_bloc.dart';
-import '../bloc/gasto_event.dart';
-import '../bloc/gasto_state.dart';
-import '../widgets/gasto_card.dart';
-import '../widgets/create_gasto_sheet.dart';
-import '../widgets/export_gastos_sheet.dart';
-import '../../../ingresos/presentation/bloc/ingreso_bloc.dart';
-import '../../../ingresos/presentation/bloc/ingreso_state.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
-import '../../../auth/presentation/bloc/auth_state.dart';
-
+import '../bloc/ingreso_bloc.dart';
+import '../bloc/ingreso_event.dart';
+import '../bloc/ingreso_state.dart';
+import '../widgets/ingreso_card.dart';
+import '../widgets/create_ingreso_sheet.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/month_names.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
 import '../../../../core/widgets/module_switch.dart';
-import '../../../../core/widgets/feedback_button.dart';
 import '../../../../generated/l10n/app_localizations.dart';
-import '../widgets/settings_sheet.dart';
 
-class GastosPage extends StatefulWidget {
-  const GastosPage({super.key});
+class IngresosPage extends StatefulWidget {
+  const IngresosPage({super.key});
 
   @override
-  State<GastosPage> createState() => _GastosPageState();
+  State<IngresosPage> createState() => _IngresosPageState();
 }
 
-class _GastosPageState extends State<GastosPage> {
+class _IngresosPageState extends State<IngresosPage> {
   late DateTime _selectedMonth;
 
   @override
   void initState() {
     super.initState();
     _selectedMonth = DateTime.now();
-    _loadFilteredGastos();
+    _loadFilteredIngresos();
   }
 
-  void _loadFilteredGastos() {
+  void _loadFilteredIngresos() {
     final start = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     final end = DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0);
-    context.read<GastoBloc>().add(LoadGastos(
+    context.read<IngresoBloc>().add(LoadIngresos(
       startDate: start.toIso8601String().substring(0, 10),
       endDate: end.toIso8601String().substring(0, 10),
     ));
@@ -52,26 +44,14 @@ class _GastosPageState extends State<GastosPage> {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month - 1);
     });
-    _loadFilteredGastos();
+    _loadFilteredIngresos();
   }
 
   void _nextMonth() {
     setState(() {
       _selectedMonth = DateTime(_selectedMonth.year, _selectedMonth.month + 1);
     });
-    _loadFilteredGastos();
-  }
-
-  void _openExportSheet(BuildContext context, List gastos) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (_) => ExportGastosSheet(
-        selectedMonth: _selectedMonth,
-        currentGastos: gastos.cast(),
-      ),
-    );
+    _loadFilteredIngresos();
   }
 
   @override
@@ -80,9 +60,9 @@ class _GastosPageState extends State<GastosPage> {
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
-        child: BlocConsumer<GastoBloc, GastoState>(
+        child: BlocConsumer<IngresoBloc, IngresoState>(
           listener: (context, state) {
-            if (state is GastoError) {
+            if (state is IngresoError) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(state.message),
@@ -94,18 +74,18 @@ class _GastosPageState extends State<GastosPage> {
             }
           },
           builder: (context, state) {
-            if (state is GastoLoading) {
+            if (state is IngresoLoading) {
               return Center(
                 child: CircularProgressIndicator(color: palette.gold),
               );
             }
 
-            if (state is GastoError) {
+            if (state is IngresoError) {
               return _buildError(context, state.message);
             }
 
-            final gastos = state is GastoLoaded ? state.gastos : [];
-            final total = state is GastoLoaded ? state.total : 0.0;
+            final ingresos = state is IngresoLoaded ? state.ingresos : [];
+            final total = state is IngresoLoaded ? state.total : 0.0;
 
             return Stack(
               children: [
@@ -115,47 +95,11 @@ class _GastosPageState extends State<GastosPage> {
                     const SizedBox(height: 16),
                     FadeInHeader(child: _buildHeader(total)),
                     Expanded(
-                      child: gastos.isEmpty
+                      child: ingresos.isEmpty
                           ? _buildEmpty()
-                          : _buildList(context, gastos),
+                          : _buildList(context, ingresos),
                     ),
                   ],
-                ),
-                const Positioned(
-                  bottom: 100,
-                  right: 24,
-                  child: FeedbackButton(),
-                ),
-                Positioned(
-                  bottom: 100,
-                  left: 24,
-                  child: GestureDetector(
-                    onTap: () {
-                      showModalBottomSheet(
-                        context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
-                        builder: (_) => BlocProvider<AuthBloc>.value(
-                          value: context.read<AuthBloc>(),
-                          child: const SettingsSheet(),
-                        ),
-                      );
-                    },
-                    child: Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: palette.surface,
-                        borderRadius: BorderRadius.circular(14),
-                        border: Border.all(color: palette.gold.withValues(alpha: 0.2)),
-                      ),
-                      child: Icon(
-                        Icons.settings_outlined,
-                        color: palette.gold,
-                        size: 20,
-                      ),
-                    ),
-                  ),
                 ),
               ],
             );
@@ -177,14 +121,14 @@ class _GastosPageState extends State<GastosPage> {
             height: 72,
             child: FloatingActionButton(
               onPressed: () {
-                final bloc = context.read<GastoBloc>();
+                final bloc = context.read<IngresoBloc>();
                 showModalBottomSheet(
                   context: context,
                   isScrollControlled: true,
                   backgroundColor: Colors.transparent,
-                  builder: (_) => BlocProvider<GastoBloc>.value(
+                  builder: (_) => BlocProvider<IngresoBloc>.value(
                     value: bloc,
-                    child: const CreateGastoSheet(),
+                    child: const CreateIngresoSheet(),
                   ),
                 );
               },
@@ -226,32 +170,14 @@ class _GastosPageState extends State<GastosPage> {
     final palette = AppColors.of(context);
     final monthName = '${getMonthAbbreviation(_selectedMonth.month, Localizations.localeOf(context).languageCode)} ${_selectedMonth.year}';
 
-    final authState = context.watch<AuthBloc>().state;
-    final ingresoState = context.watch<IngresoBloc>().state;
-    final bool isFixedSalary = (authState is AuthAuthenticated) ? authState.user.salaryType == 'fixed' : true;
-    final double salary = (authState is AuthAuthenticated && authState.user.salary != null) ? authState.user.salary! : 0.0;
-    final double accumulatedBalance = (authState is AuthAuthenticated) ? authState.user.accumulatedBalance : 0.0;
-    final double ingresosMes = (ingresoState is IngresoLoaded) ? ingresoState.total : 0.0;
-
-    final bool showBalance;
-    final double balance;
-
-    if (isFixedSalary) {
-      showBalance = salary > 0;
-      balance = accumulatedBalance + salary - total;
-    } else {
-      showBalance = ingresosMes > 0 || accumulatedBalance != 0;
-      balance = accumulatedBalance + ingresosMes - total;
-    }
-
     return Column(
       children: [
-        ModuleSwitch(currentModule: 'gastos'),
+        ModuleSwitch(currentModule: 'ingresos'),
         const SizedBox(height: 24),
         _buildMonthSelector(monthName),
         const SizedBox(height: 20),
         Text(
-          l10n.gastosTotalLabel,
+          l10n.ingresosTotalLabel,
           style: GoogleFonts.dmSans(
             fontSize: 10,
             fontWeight: FontWeight.w800,
@@ -275,8 +201,8 @@ class _GastosPageState extends State<GastosPage> {
             );
           },
           child: Text(
-            '-${CurrencyFormatter.format(total)}',
-            key: ValueKey<String>('-${CurrencyFormatter.format(total)}'),
+            CurrencyFormatter.format(total),
+            key: ValueKey<String>(CurrencyFormatter.format(total)),
             style: GoogleFonts.dmSans(
               fontSize: 52,
               fontWeight: FontWeight.w800,
@@ -291,17 +217,6 @@ class _GastosPageState extends State<GastosPage> {
             ),
           ),
         ),
-        if (showBalance) ...[
-          const SizedBox(height: 16),
-          Text(
-            CurrencyFormatter.format(balance),
-            style: GoogleFonts.dmSans(
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
-              color: balance >= 0 ? palette.textMuted : palette.error,
-            ),
-          ),
-        ],
         const SizedBox(height: 28),
       ],
     );
@@ -349,7 +264,7 @@ class _GastosPageState extends State<GastosPage> {
     );
   }
 
-  Widget _buildList(BuildContext context, List gastos) {
+  Widget _buildList(BuildContext context, List ingresos) {
     final l10n = AppLocalizations.of(context);
     final palette = AppColors.of(context);
     return Padding(
@@ -357,44 +272,24 @@ class _GastosPageState extends State<GastosPage> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                l10n.gastosFinancialFlowTitle,
-                style: GoogleFonts.dmSans(
-                  fontSize: 18,
-                  fontWeight: FontWeight.w700,
-                  color: palette.textPrimary,
-                ),
-              ),
-              GestureDetector(
-                onTap: () => _openExportSheet(context, gastos),
-                child: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: palette.surfaceLight.withValues(alpha: 0.6),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(
-                    Icons.file_download_outlined,
-                    color: palette.gold.withValues(alpha: 0.7),
-                    size: 20,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            l10n.ingresosListTitle,
+            style: GoogleFonts.dmSans(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: palette.textPrimary,
+            ),
           ),
           const SizedBox(height: 16),
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.only(bottom: 120),
-              itemCount: gastos.length,
+              itemCount: ingresos.length,
               itemBuilder: (context, index) {
-                final gasto = gastos[index];
+                final ingreso = ingresos[index];
                 return AnimatedListItem(
                   index: index,
-                  child: GastoCard(gasto: gasto),
+                  child: IngresoCard(ingreso: ingreso),
                 );
               },
             ),
@@ -415,13 +310,13 @@ class _GastosPageState extends State<GastosPage> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.receipt_long_outlined,
+              Icons.account_balance_wallet_outlined,
               size: 64,
               color: palette.gold.withValues(alpha: 0.2),
             ),
             const SizedBox(height: 16),
             Text(
-              l10n.gastosEmptyMessage,
+              l10n.ingresosEmptyMessage,
               style: GoogleFonts.dmSans(
                 fontSize: 14,
                 color: palette.textMuted,
@@ -446,7 +341,7 @@ class _GastosPageState extends State<GastosPage> {
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () {
-              _loadFilteredGastos();
+              _loadFilteredIngresos();
             },
             child: Text(l10n.retryButton),
           ),

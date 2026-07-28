@@ -23,7 +23,9 @@ abstract class AuthRemoteDataSource {
 
   Future<void> completeGuide();
 
-  Future<void> updateSalary(double salary);
+  Future<void> updateSalary(double salary, String salaryType);
+
+  Future<void> updateAccumulatedBalance(double balance);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -104,6 +106,9 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         } else {
           await _localStorage.remove(AppConstants.salaryKey);
         }
+
+        await _localStorage.setString(AppConstants.salaryTypeKey, user.salaryType);
+        await _localStorage.setDouble(AppConstants.accumulatedBalanceKey, user.accumulatedBalance);
 
         final partnerId = result['partner_id'] as int?;
         final partnerName = result['partner_name'] as String?;
@@ -190,7 +195,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
 
     if (userId != null && userName != null && friendCode != null) {
-      return UserModel(id: userId, name: userName, friendCode: friendCode);
+      final guide = await _localStorage.getInt(AppConstants.guideKey);
+      final salary = await _localStorage.getDouble(AppConstants.salaryKey);
+      final salaryType = await _localStorage.getString(AppConstants.salaryTypeKey);
+      final accumulatedBalance = await _localStorage.getDouble(AppConstants.accumulatedBalanceKey);
+      return UserModel(
+        id: userId,
+        name: userName,
+        friendCode: friendCode,
+        guide: guide,
+        salary: salary,
+        salaryType: salaryType ?? 'fixed',
+        accumulatedBalance: accumulatedBalance ?? 0,
+      );
     }
 
     return null;
@@ -220,13 +237,14 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> updateSalary(double salary) async {
+  Future<void> updateSalary(double salary, String salaryType) async {
     try {
       final userId = await _getCurrentUserId();
 
       final result = await _client.rpc('sp_update_salary', params: {
         'p_user_id': userId,
         'p_salary': salary,
+        'p_salary_type': salaryType,
       });
 
       if (result is Map<String, dynamic>) {
@@ -236,6 +254,31 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       await _localStorage.setDouble(AppConstants.salaryKey, salary);
+      await _localStorage.setString(AppConstants.salaryTypeKey, salaryType);
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    }
+  }
+
+  @override
+  Future<void> updateAccumulatedBalance(double balance) async {
+    try {
+      final userId = await _getCurrentUserId();
+
+      final result = await _client.rpc('sp_update_accumulated_balance', params: {
+        'p_user_id': userId,
+        'p_balance': balance,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+      }
+
+      await _localStorage.setDouble(AppConstants.accumulatedBalanceKey, balance);
     } on AppAuthException {
       rethrow;
     } on PostgrestException catch (e) {

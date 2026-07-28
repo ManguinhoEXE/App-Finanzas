@@ -21,5 +21,7 @@ abstract class AuthRepository {
 
   Future<Either<Failure, void>> completeGuide();
 
-  Future<Either<Failure, void>> updateSalary(double salary);
+  Future<Either<Failure, void>> updateSalary(double salary, String salaryType);
+
+  Future<Either<Failure, void>> updateAccumulatedBalance(double balance);
 }

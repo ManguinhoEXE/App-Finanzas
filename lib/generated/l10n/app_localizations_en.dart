@@ -155,6 +155,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get gastosModuleTab => 'Expenses';
 
   @override
+  String get ingresosModuleTab => 'Income';
+
+  @override
   String get ahorrosModuleTab => 'Savings';
 
   @override
@@ -256,7 +259,64 @@ class AppLocalizationsEn extends AppLocalizations {
   String get settingsSalaryLabel => 'MONTHLY SALARY';
 
   @override
+  String get settingsSalaryTypeLabel => 'SALARY TYPE';
+
+  @override
+  String get settingsSalaryTypeFixed => 'Fixed';
+
+  @override
+  String get settingsSalaryTypeVariable => 'Variable';
+
+  @override
   String get settingsSaveButton => 'SAVE';
+
+  @override
+  String get ingresosTotalLabel => 'TOTAL INCOME';
+
+  @override
+  String get ingresosListTitle => 'Income';
+
+  @override
+  String get ingresosEmptyMessage => 'No income recorded';
+
+  @override
+  String get ingresoCreateTitle => 'NEW INCOME';
+
+  @override
+  String get ingresoEditTitle => 'EDIT INCOME';
+
+  @override
+  String get ingresoCategoryLabel => 'CATEGORY';
+
+  @override
+  String get ingresoCategoryHint => 'Select or type one...';
+
+  @override
+  String get ingresoCategoryClient => 'Client';
+
+  @override
+  String get ingresoCategoryInvestment => 'Investment';
+
+  @override
+  String get ingresoCategoryOther => 'Other';
+
+  @override
+  String get ingresoDescriptionLabel => 'DESCRIPTION';
+
+  @override
+  String get ingresoDescriptionHint => 'e.g. Freelance project payment';
+
+  @override
+  String get ingresoAmountLabel => 'AMOUNT';
+
+  @override
+  String get ingresoDateLabel => 'DATE';
+
+  @override
+  String get ingresoUpdateButton => 'UPDATE';
+
+  @override
+  String get ingresoSaveButton => 'SAVE INCOME';
 
   @override
   String get ahorrosTotalLabel => 'TOTAL SAVED';
@@ -393,6 +453,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorUpdateGasto => 'Error updating expense';
+
+  @override
+  String get errorGetIngresos => 'Error fetching income';
+
+  @override
+  String get errorIngresoNotFound => 'Income not found';
+
+  @override
+  String get errorGetIngreso => 'Error fetching income';
+
+  @override
+  String get errorCreateIngreso => 'Error creating income';
+
+  @override
+  String get errorIngresoEditPermission => 'You don\'t have permission to edit this income';
+
+  @override
+  String get errorUpdateIngreso => 'Error updating income';
 
   @override
   String get errorGetAhorros => 'Error fetching savings';

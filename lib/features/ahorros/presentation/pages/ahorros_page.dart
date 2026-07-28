@@ -1,20 +1,17 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/ahorro_bloc.dart';
 import '../bloc/ahorro_event.dart';
 import '../bloc/ahorro_state.dart';
 import '../widgets/ahorro_card.dart';
 import '../widgets/create_ahorro_sheet.dart';
-import '../../../auth/presentation/widgets/friend_code_sheet.dart';
-import '../../../auth/presentation/bloc/auth_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/utils/currency_formatter.dart';
 import '../../../../core/utils/animated_list_item.dart';
 import '../../../../core/utils/fade_in_header.dart';
-import '../../../../core/widgets/theme_toggle.dart';
+import '../../../../core/widgets/module_switch.dart';
 import '../../../../core/widgets/feedback_button.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
@@ -35,7 +32,6 @@ class _AhorrosPageState extends State<AhorrosPage> {
   @override
   Widget build(BuildContext context) {
     final palette = AppColors.of(context);
-    final l10n = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: palette.background,
       body: SafeArea(
@@ -130,7 +126,7 @@ class _AhorrosPageState extends State<AhorrosPage> {
     final l10n = AppLocalizations.of(context);
     return Column(
       children: [
-        _buildModuleSwitch(),
+        ModuleSwitch(currentModule: 'ahorros'),
         const SizedBox(height: 36),
         Text(
           l10n.ahorrosTotalLabel,
@@ -175,103 +171,6 @@ class _AhorrosPageState extends State<AhorrosPage> {
           ),
         const SizedBox(height: 28),
       ],
-    );
-  }
-
-  Widget _buildModuleSwitch() {
-    final palette = AppColors.of(context);
-    final l10n = AppLocalizations.of(context);
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        GestureDetector(
-          onTap: () {
-            showModalBottomSheet(
-              context: context,
-              isScrollControlled: true,
-              backgroundColor: Colors.transparent,
-              builder: (_) => BlocProvider<AuthBloc>.value(
-                value: context.read<AuthBloc>(),
-                child: const FriendCodeSheet(),
-              ),
-            );
-          },
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            width: 28,
-            height: 52,
-            decoration: BoxDecoration(
-              color: palette.surface,
-              borderRadius: BorderRadius.circular(14),
-              border: Border.all(
-                color: palette.gold.withValues(alpha: 0.2),
-                width: 1,
-              ),
-            ),
-            child: Icon(
-              Icons.person_add,
-              color: palette.gold,
-              size: 16,
-            ),
-          ),
-        ),
-        const SizedBox(width: 12),
-        Container(
-          padding: const EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: palette.surfaceLight.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: palette.textPrimary.withValues(alpha: 0.05)),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _buildSwitchOption(context, l10n.gastosModuleTab, false),
-              _buildSwitchOption(context, l10n.ahorrosModuleTab, true),
-            ],
-          ),
-        ),
-        const SizedBox(width: 12),
-        const ThemeToggle(),
-      ],
-    );
-  }
-
-  Widget _buildSwitchOption(BuildContext context, String label, bool active) {
-    final palette = AppColors.of(context);
-    return GestureDetector(
-      onTap: () {
-        if (!active) {
-          context.go('/gastos');
-        }
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 300),
-        curve: Curves.easeOutCubic,
-        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 12),
-        decoration: BoxDecoration(
-          color: active ? palette.tabActiveBg : palette.tabInactiveBg,
-          borderRadius: BorderRadius.circular(12),
-          boxShadow: active
-              ? [
-                  BoxShadow(
-                    color: palette.gold.withValues(alpha: 0.25),
-                    blurRadius: 16,
-                    spreadRadius: 2,
-                  ),
-                ]
-              : null,
-        ),
-        child: Text(
-          label.toUpperCase(),
-          style: GoogleFonts.dmSans(
-            fontSize: 11,
-            fontWeight: FontWeight.w800,
-            color: active ? palette.tabActiveText : palette.tabInactiveText,
-            letterSpacing: 1.5,
-          ),
-        ),
-      ),
     );
   }
 

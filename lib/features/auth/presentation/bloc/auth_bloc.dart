@@ -130,6 +130,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     await _localStorage.remove(AppConstants.partnerNameKey);
     await _localStorage.remove(AppConstants.guideKey);
     await _localStorage.remove(AppConstants.salaryKey);
+    await _localStorage.remove(AppConstants.salaryTypeKey);
+    await _localStorage.remove(AppConstants.accumulatedBalanceKey);
     emit(const AuthUnauthenticated());
   }
 
@@ -144,8 +146,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     if (userId != null && userName != null && friendCode != null) {
       final guide = await _localStorage.getInt(AppConstants.guideKey);
       final salary = await _localStorage.getDouble(AppConstants.salaryKey);
+      final salaryType = await _localStorage.getString(AppConstants.salaryTypeKey);
+      final accumulatedBalance = await _localStorage.getDouble(AppConstants.accumulatedBalanceKey);
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide, salary: salary),
+        user: UserModel(
+          id: userId,
+          name: userName,
+          friendCode: friendCode,
+          guide: guide,
+          salary: salary,
+          salaryType: salaryType ?? 'fixed',
+          accumulatedBalance: accumulatedBalance ?? 0,
+        ),
       ));
     } else {
       emit(const AuthUnauthenticated());
@@ -169,10 +181,20 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userName = await _localStorage.getString(AppConstants.userNameKey);
     final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
     final salary = await _localStorage.getDouble(AppConstants.salaryKey);
+    final salaryType = await _localStorage.getString(AppConstants.salaryTypeKey) ?? 'fixed';
+    final accumulatedBalance = await _localStorage.getDouble(AppConstants.accumulatedBalanceKey) ?? 0;
 
     if (userId != null && userName != null && friendCode != null) {
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: 1, salary: salary),
+        user: UserModel(
+          id: userId,
+          name: userName,
+          friendCode: friendCode,
+          guide: 1,
+          salary: salary,
+          salaryType: salaryType,
+          accumulatedBalance: accumulatedBalance,
+        ),
       ));
     }
   }
@@ -181,7 +203,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     UpdateSalaryRequested event,
     Emitter<AuthState> emit,
   ) async {
-    final result = await updateSalaryUseCase(UpdateSalaryParams(salary: event.salary));
+    final result = await updateSalaryUseCase(UpdateSalaryParams(
+      salary: event.salary,
+      salaryType: event.salaryType,
+    ));
 
     result.fold(
       (failure) {},
@@ -192,10 +217,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final userName = await _localStorage.getString(AppConstants.userNameKey);
     final friendCode = await _localStorage.getString(AppConstants.friendCodeKey);
     final guide = await _localStorage.getInt(AppConstants.guideKey);
+    final accumulatedBalance = await _localStorage.getDouble(AppConstants.accumulatedBalanceKey) ?? 0;
 
     if (userId != null && userName != null && friendCode != null) {
       emit(AuthAuthenticated(
-        user: UserModel(id: userId, name: userName, friendCode: friendCode, guide: guide, salary: event.salary),
+        user: UserModel(
+          id: userId,
+          name: userName,
+          friendCode: friendCode,
+          guide: guide,
+          salary: event.salary,
+          salaryType: event.salaryType,
+          accumulatedBalance: accumulatedBalance,
+        ),
       ));
     }
   }

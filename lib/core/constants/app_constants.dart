@@ -9,11 +9,14 @@
   static const String partnerNameKey = 'partner_name';
   static const String guideKey = 'guide';
   static const String salaryKey = 'salary';
+  static const String salaryTypeKey = 'salary_type';
+  static const String accumulatedBalanceKey = 'accumulated_balance';
 
   // Routes
   static const String loginRoute = '/login';
   static const String registerRoute = '/register';
   static const String gastosRoute = '/gastos';
+  static const String ingresosRoute = '/ingresos';
   static const String ahorrosRoute = '/ahorros';
 
   // Animation Durations

@@ -92,9 +92,23 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, void>> updateSalary(double salary) async {
+  Future<Either<Failure, void>> updateSalary(double salary, String salaryType) async {
     try {
-      await remoteDataSource.updateSalary(salary);
+      await remoteDataSource.updateSalary(salary, salaryType);
+      return const Right(null);
+    } on AppAuthException catch (e) {
+      return Left(AuthFailure(message: e.message));
+    } on ServerException catch (e) {
+      return Left(ServerFailure(message: e.message));
+    } catch (e) {
+      return Left(ServerFailure(message: 'Error inesperado: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateAccumulatedBalance(double balance) async {
+    try {
+      await remoteDataSource.updateAccumulatedBalance(balance);
       return const Right(null);
     } on AppAuthException catch (e) {
       return Left(AuthFailure(message: e.message));

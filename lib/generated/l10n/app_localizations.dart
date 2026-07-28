@@ -383,6 +383,12 @@ abstract class AppLocalizations {
   /// **'Gastos'**
   String get gastosModuleTab;
 
+  /// No description provided for @ingresosModuleTab.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresos'**
+  String get ingresosModuleTab;
+
   /// No description provided for @ahorrosModuleTab.
   ///
   /// In es, this message translates to:
@@ -581,11 +587,125 @@ abstract class AppLocalizations {
   /// **'SUELDO MENSUAL'**
   String get settingsSalaryLabel;
 
+  /// No description provided for @settingsSalaryTypeLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'TIPO DE SALARIO'**
+  String get settingsSalaryTypeLabel;
+
+  /// No description provided for @settingsSalaryTypeFixed.
+  ///
+  /// In es, this message translates to:
+  /// **'Fijo'**
+  String get settingsSalaryTypeFixed;
+
+  /// No description provided for @settingsSalaryTypeVariable.
+  ///
+  /// In es, this message translates to:
+  /// **'Variable'**
+  String get settingsSalaryTypeVariable;
+
   /// No description provided for @settingsSaveButton.
   ///
   /// In es, this message translates to:
   /// **'GUARDAR'**
   String get settingsSaveButton;
+
+  /// No description provided for @ingresosTotalLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'INGRESOS TOTALES'**
+  String get ingresosTotalLabel;
+
+  /// No description provided for @ingresosListTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingresos'**
+  String get ingresosListTitle;
+
+  /// No description provided for @ingresosEmptyMessage.
+  ///
+  /// In es, this message translates to:
+  /// **'No hay ingresos registrados'**
+  String get ingresosEmptyMessage;
+
+  /// No description provided for @ingresoCreateTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'NUEVO INGRESO'**
+  String get ingresoCreateTitle;
+
+  /// No description provided for @ingresoEditTitle.
+  ///
+  /// In es, this message translates to:
+  /// **'EDITAR INGRESO'**
+  String get ingresoEditTitle;
+
+  /// No description provided for @ingresoCategoryLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'CATEGORÍA'**
+  String get ingresoCategoryLabel;
+
+  /// No description provided for @ingresoCategoryHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Selecciona o escribe una...'**
+  String get ingresoCategoryHint;
+
+  /// No description provided for @ingresoCategoryClient.
+  ///
+  /// In es, this message translates to:
+  /// **'Cliente'**
+  String get ingresoCategoryClient;
+
+  /// No description provided for @ingresoCategoryInvestment.
+  ///
+  /// In es, this message translates to:
+  /// **'Inversión'**
+  String get ingresoCategoryInvestment;
+
+  /// No description provided for @ingresoCategoryOther.
+  ///
+  /// In es, this message translates to:
+  /// **'Otro'**
+  String get ingresoCategoryOther;
+
+  /// No description provided for @ingresoDescriptionLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'DESCRIPCIÓN'**
+  String get ingresoDescriptionLabel;
+
+  /// No description provided for @ingresoDescriptionHint.
+  ///
+  /// In es, this message translates to:
+  /// **'Ej: Pago de proyecto freelance'**
+  String get ingresoDescriptionHint;
+
+  /// No description provided for @ingresoAmountLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'VALOR'**
+  String get ingresoAmountLabel;
+
+  /// No description provided for @ingresoDateLabel.
+  ///
+  /// In es, this message translates to:
+  /// **'FECHA'**
+  String get ingresoDateLabel;
+
+  /// No description provided for @ingresoUpdateButton.
+  ///
+  /// In es, this message translates to:
+  /// **'ACTUALIZAR'**
+  String get ingresoUpdateButton;
+
+  /// No description provided for @ingresoSaveButton.
+  ///
+  /// In es, this message translates to:
+  /// **'GUARDAR INGRESO'**
+  String get ingresoSaveButton;
 
   /// No description provided for @ahorrosTotalLabel.
   ///
@@ -850,6 +970,42 @@ abstract class AppLocalizations {
   /// In es, this message translates to:
   /// **'Error al actualizar gasto'**
   String get errorUpdateGasto;
+
+  /// No description provided for @errorGetIngresos.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al obtener ingresos'**
+  String get errorGetIngresos;
+
+  /// No description provided for @errorIngresoNotFound.
+  ///
+  /// In es, this message translates to:
+  /// **'Ingreso no encontrado'**
+  String get errorIngresoNotFound;
+
+  /// No description provided for @errorGetIngreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al obtener ingreso'**
+  String get errorGetIngreso;
+
+  /// No description provided for @errorCreateIngreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al crear ingreso'**
+  String get errorCreateIngreso;
+
+  /// No description provided for @errorIngresoEditPermission.
+  ///
+  /// In es, this message translates to:
+  /// **'No tienes permiso para editar este ingreso'**
+  String get errorIngresoEditPermission;
+
+  /// No description provided for @errorUpdateIngreso.
+  ///
+  /// In es, this message translates to:
+  /// **'Error al actualizar ingreso'**
+  String get errorUpdateIngreso;
 
   /// No description provided for @errorGetAhorros.
   ///

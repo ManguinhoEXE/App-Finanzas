@@ -3,6 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/services/services.dart';
 import '../../features/auth/auth.dart';
 import '../../features/gastos/gastos.dart';
+import '../../features/ingresos/ingresos.dart';
 import '../../features/ahorros/ahorros.dart';
 
 final getIt = GetIt.instance;
@@ -59,6 +60,26 @@ void setupDependencies() {
       getGastoUseCase: getIt(),
       createGastoUseCase: getIt(),
       updateGastoUseCase: getIt(),
+    ),
+  );
+
+  // Ingresos
+  getIt.registerLazySingleton<IngresoRemoteDataSource>(
+    () => IngresoRemoteDataSourceImpl(client: getIt(), localStorage: getIt()),
+  );
+  getIt.registerLazySingleton<IngresoRepository>(
+    () => IngresoRepositoryImpl(remoteDataSource: getIt()),
+  );
+  getIt.registerLazySingleton(() => GetIngresosUseCase(getIt()));
+  getIt.registerLazySingleton(() => GetIngresoUseCase(getIt()));
+  getIt.registerLazySingleton(() => CreateIngresoUseCase(getIt()));
+  getIt.registerLazySingleton(() => UpdateIngresoUseCase(getIt()));
+  getIt.registerFactory(
+    () => IngresoBloc(
+      getIngresosUseCase: getIt(),
+      getIngresoUseCase: getIt(),
+      createIngresoUseCase: getIt(),
+      updateIngresoUseCase: getIt(),
     ),
   );
 

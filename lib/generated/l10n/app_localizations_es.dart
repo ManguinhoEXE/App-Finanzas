@@ -155,6 +155,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get gastosModuleTab => 'Gastos';
 
   @override
+  String get ingresosModuleTab => 'Ingresos';
+
+  @override
   String get ahorrosModuleTab => 'Ahorros';
 
   @override
@@ -256,7 +259,64 @@ class AppLocalizationsEs extends AppLocalizations {
   String get settingsSalaryLabel => 'SUELDO MENSUAL';
 
   @override
+  String get settingsSalaryTypeLabel => 'TIPO DE SALARIO';
+
+  @override
+  String get settingsSalaryTypeFixed => 'Fijo';
+
+  @override
+  String get settingsSalaryTypeVariable => 'Variable';
+
+  @override
   String get settingsSaveButton => 'GUARDAR';
+
+  @override
+  String get ingresosTotalLabel => 'INGRESOS TOTALES';
+
+  @override
+  String get ingresosListTitle => 'Ingresos';
+
+  @override
+  String get ingresosEmptyMessage => 'No hay ingresos registrados';
+
+  @override
+  String get ingresoCreateTitle => 'NUEVO INGRESO';
+
+  @override
+  String get ingresoEditTitle => 'EDITAR INGRESO';
+
+  @override
+  String get ingresoCategoryLabel => 'CATEGORÍA';
+
+  @override
+  String get ingresoCategoryHint => 'Selecciona o escribe una...';
+
+  @override
+  String get ingresoCategoryClient => 'Cliente';
+
+  @override
+  String get ingresoCategoryInvestment => 'Inversión';
+
+  @override
+  String get ingresoCategoryOther => 'Otro';
+
+  @override
+  String get ingresoDescriptionLabel => 'DESCRIPCIÓN';
+
+  @override
+  String get ingresoDescriptionHint => 'Ej: Pago de proyecto freelance';
+
+  @override
+  String get ingresoAmountLabel => 'VALOR';
+
+  @override
+  String get ingresoDateLabel => 'FECHA';
+
+  @override
+  String get ingresoUpdateButton => 'ACTUALIZAR';
+
+  @override
+  String get ingresoSaveButton => 'GUARDAR INGRESO';
 
   @override
   String get ahorrosTotalLabel => 'ACTIVOS AHORRADOS';
@@ -393,6 +453,24 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get errorUpdateGasto => 'Error al actualizar gasto';
+
+  @override
+  String get errorGetIngresos => 'Error al obtener ingresos';
+
+  @override
+  String get errorIngresoNotFound => 'Ingreso no encontrado';
+
+  @override
+  String get errorGetIngreso => 'Error al obtener ingreso';
+
+  @override
+  String get errorCreateIngreso => 'Error al crear ingreso';
+
+  @override
+  String get errorIngresoEditPermission => 'No tienes permiso para editar este ingreso';
+
+  @override
+  String get errorUpdateIngreso => 'Error al actualizar ingreso';
 
   @override
   String get errorGetAhorros => 'Error al obtener ahorros';

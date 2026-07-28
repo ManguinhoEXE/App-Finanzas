@@ -10,12 +10,13 @@ class UpdateSalaryUseCase implements UseCase<void, UpdateSalaryParams> {
 
   @override
   Future<Either<Failure, void>> call(UpdateSalaryParams params) async {
-    return await repository.updateSalary(params.salary);
+    return await repository.updateSalary(params.salary, params.salaryType);
   }
 }
 
 class UpdateSalaryParams {
   final double salary;
+  final String salaryType;
 
-  const UpdateSalaryParams({required this.salary});
+  const UpdateSalaryParams({required this.salary, required this.salaryType});
 }

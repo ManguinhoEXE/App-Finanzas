@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import '../../features/auth/auth.dart';
 import '../../features/gastos/gastos.dart';
+import '../../features/ingresos/ingresos.dart';
 import '../../features/ahorros/ahorros.dart';
 import '../di/dependency_injection.dart';
 
@@ -65,6 +66,7 @@ class AppRouter {
         builder: (context, state, child) => MultiBlocProvider(
           providers: [
             BlocProvider(create: (_) => getIt<GastoBloc>()),
+            BlocProvider(create: (_) => getIt<IngresoBloc>()),
             BlocProvider(create: (_) => getIt<AhorroBloc>()),
           ],
           child: Scaffold(
@@ -78,6 +80,13 @@ class AppRouter {
             name: 'gastos',
             pageBuilder: (context, state) => const NoTransitionPage(
               child: GastosPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/ingresos',
+            name: 'ingresos',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: IngresosPage(),
             ),
           ),
           GoRoute(
@@ -99,7 +108,7 @@ class AppRouter {
           location == '/splash' ||
           location == '/onboarding';
 
-      final isAppRoute = location == '/gastos' || location == '/ahorros';
+      final isAppRoute = location == '/gastos' || location == '/ingresos' || location == '/ahorros';
 
       if (authState is AuthInitial || authState is AuthLoading) {
         return '/splash';
@@ -108,6 +117,9 @@ class AppRouter {
       if (authState is AuthAuthenticated) {
         if (authState.user.guide == null) {
           return location == '/onboarding' ? null : '/onboarding';
+        }
+        if (location == '/ingresos' && authState.user.salaryType == 'fixed') {
+          return '/gastos';
         }
         if (isAuthRoute) {
           return '/gastos';
