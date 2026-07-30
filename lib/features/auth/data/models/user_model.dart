@@ -9,6 +9,9 @@ class UserModel extends User {
     super.salary,
     super.salaryType,
     super.accumulatedBalance,
+    super.migrated,
+    super.authUserId,
+    super.email,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) {
@@ -20,6 +23,9 @@ class UserModel extends User {
       salary: (json['salary'] as num?)?.toDouble(),
       salaryType: json['salary_type'] as String? ?? 'fixed',
       accumulatedBalance: (json['accumulated_balance'] as num?)?.toDouble() ?? 0,
+      migrated: json['migrated'] == true,
+      authUserId: json['auth_user_id'] as String?,
+      email: json['email'] as String?,
     );
   }
 
@@ -32,6 +38,9 @@ class UserModel extends User {
       'salary': salary,
       'salary_type': salaryType,
       'accumulated_balance': accumulatedBalance,
+      'migrated': migrated,
+      'auth_user_id': authUserId,
+      'email': email,
     };
   }
 }

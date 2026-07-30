@@ -10,21 +10,36 @@ abstract class AuthEvent extends Equatable {
 class SignUpRequested extends AuthEvent {
   final String name;
   final String password;
+  final String email;
 
   const SignUpRequested({
     required this.name,
     required this.password,
+    required this.email,
   });
 
   @override
-  List<Object> get props => [name, password];
+  List<Object> get props => [name, password, email];
 }
 
 class SignInRequested extends AuthEvent {
-  final String name;
+  final String email;
   final String password;
 
   const SignInRequested({
+    required this.email,
+    required this.password,
+  });
+
+  @override
+  List<Object> get props => [email, password];
+}
+
+class SignInWithNameRequested extends AuthEvent {
+  final String name;
+  final String password;
+
+  const SignInWithNameRequested({
     required this.name,
     required this.password,
   });
@@ -66,4 +81,41 @@ class UpdateSalaryRequested extends AuthEvent {
 
   @override
   List<Object> get props => [salary, salaryType];
+}
+
+class MigrateRequested extends AuthEvent {
+  final int userId;
+  final String password;
+  final String email;
+
+  const MigrateRequested({
+    required this.userId,
+    required this.password,
+    required this.email,
+  });
+
+  @override
+  List<Object> get props => [userId, password, email];
+}
+
+class ForgotPasswordRequested extends AuthEvent {
+  final String email;
+
+  const ForgotPasswordRequested({required this.email});
+
+  @override
+  List<Object> get props => [email];
+}
+
+class PasswordRecoveryDetected extends AuthEvent {
+  const PasswordRecoveryDetected();
+}
+
+class ResetPasswordRequested extends AuthEvent {
+  final String newPassword;
+
+  const ResetPasswordRequested({required this.newPassword});
+
+  @override
+  List<Object> get props => [newPassword];
 }

@@ -13,6 +13,9 @@ void main() async {
   await Supabase.initialize(
     url: SupabaseConfig.url,
     publishableKey: SupabaseConfig.anonKey,
+    authOptions: const FlutterAuthClientOptions(
+      detectSessionInUri: true,
+    ),
   );
   await initializeDateFormatting('es_CO', null);
   await initializeDateFormatting('en_US', null);

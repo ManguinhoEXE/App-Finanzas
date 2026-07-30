@@ -8,9 +8,15 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> signUp({
     required String name,
     required String password,
+    required String email,
   });
 
-  Future<UserModel> signIn({
+  Future<UserModel> signInWithSupabase({
+    required String email,
+    required String password,
+  });
+
+  Future<UserModel> signInLegacy({
     required String name,
     required String password,
   });
@@ -26,6 +32,17 @@ abstract class AuthRemoteDataSource {
   Future<void> updateSalary(double salary, String salaryType);
 
   Future<void> updateAccumulatedBalance(double balance);
+
+  Future<Map<String, dynamic>> migrateUser({
+    required int userId,
+    required String password,
+    required String email,
+  });
+
+  Future<void> syncPasswordByEmail({
+    required String email,
+    required String newPassword,
+  });
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -42,11 +59,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> signUp({
     required String name,
     required String password,
+    required String email,
   }) async {
     try {
       final result = await _client.rpc('sp_register_user', params: {
         'p_name': name,
         'p_password': password,
+        'p_email': email,
       });
 
       if (result is Map<String, dynamic>) {
@@ -54,11 +73,13 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           throw AppAuthException(message: result['error']);
         }
 
+        try {
+          await _client.auth.signInWithPassword(email: email, password: password);
+        } catch (_) {}
+
         final user = UserModel.fromJson(result);
 
-        await _localStorage.setInt(AppConstants.userIdKey, user.id);
-        await _localStorage.setString(AppConstants.userNameKey, user.name);
-        await _localStorage.setString(AppConstants.friendCodeKey, user.friendCode);
+        await _storeUserData(user, result);
 
         return user;
       }
@@ -74,7 +95,51 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<UserModel> signIn({
+  Future<UserModel> signInWithSupabase({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await _client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
+
+      if (response.session == null || response.user == null) {
+        throw AppAuthException(message: 'Error al iniciar sesion');
+      }
+
+      final authId = response.user!.id;
+      final result = await _client.rpc('sp_get_user_by_auth_id', params: {
+        'p_auth_id': authId,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+
+        final user = UserModel.fromJson(result);
+
+        await _storeUserData(user, result);
+
+        return user;
+      }
+
+      throw ServerException(message: 'Respuesta inesperada del servidor');
+    } on AppAuthException {
+      rethrow;
+    } on AuthException catch (e) {
+      throw AppAuthException(message: e.message);
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Error al iniciar sesion: $e');
+    }
+  }
+
+  @override
+  Future<UserModel> signInLegacy({
     required String name,
     required String password,
   }) async {
@@ -91,33 +156,15 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
         final user = UserModel.fromJson(result);
 
-        await _localStorage.setInt(AppConstants.userIdKey, user.id);
-        await _localStorage.setString(AppConstants.userNameKey, user.name);
-        await _localStorage.setString(AppConstants.friendCodeKey, user.friendCode);
+        await _storeUserData(user, result);
 
-        if (user.guide != null) {
-          await _localStorage.setInt(AppConstants.guideKey, user.guide!);
-        } else {
-          await _localStorage.remove(AppConstants.guideKey);
-        }
-
-        if (user.salary != null) {
-          await _localStorage.setDouble(AppConstants.salaryKey, user.salary!);
-        } else {
-          await _localStorage.remove(AppConstants.salaryKey);
-        }
-
-        await _localStorage.setString(AppConstants.salaryTypeKey, user.salaryType);
-        await _localStorage.setDouble(AppConstants.accumulatedBalanceKey, user.accumulatedBalance);
-
-        final partnerId = result['partner_id'] as int?;
-        final partnerName = result['partner_name'] as String?;
-        if (partnerId != null && partnerName != null) {
-          await _localStorage.setInt(AppConstants.partnerIdKey, partnerId);
-          await _localStorage.setString(AppConstants.partnerNameKey, partnerName);
-        } else {
-          await _localStorage.remove(AppConstants.partnerIdKey);
-          await _localStorage.remove(AppConstants.partnerNameKey);
+        if (user.migrated && user.email != null) {
+          try {
+            await _client.auth.signInWithPassword(
+              email: user.email!,
+              password: password,
+            );
+          } catch (_) {}
         }
 
         return user;
@@ -286,9 +333,108 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     }
   }
 
+  @override
+  Future<Map<String, dynamic>> migrateUser({
+    required int userId,
+    required String password,
+    required String email,
+  }) async {
+    try {
+      final result = await _client.rpc('sp_migrate_user', params: {
+        'p_user_id': userId,
+        'p_password': password,
+        'p_email': email,
+      });
+
+      if (result is Map<String, dynamic>) {
+        if (result.containsKey('error')) {
+          throw AppAuthException(message: result['error']);
+        }
+
+        try {
+          await _client.auth.signInWithPassword(
+            email: email,
+            password: password,
+          );
+        } catch (_) {}
+
+        return result;
+      }
+
+      throw ServerException(message: 'Respuesta inesperada del servidor');
+    } on AppAuthException {
+      rethrow;
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    } catch (e) {
+      throw ServerException(message: 'Error al migrar usuario: $e');
+    }
+  }
+
+  @override
+  Future<void> syncPasswordByEmail({
+    required String email,
+    required String newPassword,
+  }) async {
+    try {
+      await _client.rpc('sp_update_password_by_email', params: {
+        'p_email': email,
+        'p_new_password': newPassword,
+      });
+    } on PostgrestException catch (e) {
+      throw ServerException(message: e.message);
+    }
+  }
+
   Future<int> _getCurrentUserId() async {
     final userId = await _localStorage.getInt(AppConstants.userIdKey);
     if (userId == null) throw AppAuthException(message: 'Usuario no autenticado');
     return userId;
+  }
+
+  Future<void> _storeUserData(UserModel user, Map<String, dynamic> result) async {
+    await _localStorage.setInt(AppConstants.userIdKey, user.id);
+    await _localStorage.setString(AppConstants.userNameKey, user.name);
+    await _localStorage.setString(AppConstants.friendCodeKey, user.friendCode);
+
+    if (user.guide != null) {
+      await _localStorage.setInt(AppConstants.guideKey, user.guide!);
+    } else {
+      await _localStorage.remove(AppConstants.guideKey);
+    }
+
+    if (user.salary != null) {
+      await _localStorage.setDouble(AppConstants.salaryKey, user.salary!);
+    } else {
+      await _localStorage.remove(AppConstants.salaryKey);
+    }
+
+    await _localStorage.setString(AppConstants.salaryTypeKey, user.salaryType);
+    await _localStorage.setDouble(AppConstants.accumulatedBalanceKey, user.accumulatedBalance);
+
+    final partnerId = result['partner_id'] as int?;
+    final partnerName = result['partner_name'] as String?;
+    if (partnerId != null && partnerName != null) {
+      await _localStorage.setInt(AppConstants.partnerIdKey, partnerId);
+      await _localStorage.setString(AppConstants.partnerNameKey, partnerName);
+    } else {
+      await _localStorage.remove(AppConstants.partnerIdKey);
+      await _localStorage.remove(AppConstants.partnerNameKey);
+    }
+
+    final migrated = result['migrated'] == true;
+    await _localStorage.setBool(AppConstants.migratedKey, migrated);
+
+    final authUserId = result['auth_user_id'] as String?;
+    if (authUserId != null) {
+      await _localStorage.setString(AppConstants.authUserIdKey, authUserId);
+    } else {
+      await _localStorage.remove(AppConstants.authUserIdKey);
+    }
+
+    final email = result['email'] as String?;
+    if (email != null) {
+      await _localStorage.setString(AppConstants.emailKey, email);
+    }
   }
 }

@@ -27,6 +27,42 @@ class AppRouter {
         ),
       ),
       GoRoute(
+        path: '/migrate',
+        name: 'migrate',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const MigrationPage(),
+          transitionsBuilder: _slideTransition(slideFromRight: true),
+          transitionDuration: const Duration(milliseconds: 450),
+          reverseTransitionDuration: const Duration(milliseconds: 350),
+        ),
+      ),
+      GoRoute(
+        path: '/forgot-password',
+        name: 'forgot-password',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ForgotPasswordPage(),
+          transitionsBuilder: _slideTransition(slideFromRight: false),
+          transitionDuration: const Duration(milliseconds: 450),
+          reverseTransitionDuration: const Duration(milliseconds: 350),
+        ),
+      ),
+      GoRoute(
+        path: '/reset-password',
+        name: 'reset-password',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: const ResetPasswordPage(),
+          transitionsBuilder: _slideTransition(slideFromRight: true),
+          transitionDuration: const Duration(milliseconds: 450),
+          reverseTransitionDuration: const Duration(milliseconds: 350),
+        ),
+      ),
+      GoRoute(
         path: '/login',
         name: 'login',
         parentNavigatorKey: _rootNavigatorKey,
@@ -106,15 +142,31 @@ class AppRouter {
       final isAuthRoute = location == '/login' ||
           location == '/register' ||
           location == '/splash' ||
-          location == '/onboarding';
+          location == '/onboarding' ||
+          location == '/forgot-password' ||
+          location == '/reset-password';
 
       final isAppRoute = location == '/gastos' || location == '/ingresos' || location == '/ahorros';
 
       if (authState is AuthInitial || authState is AuthLoading) {
+        if (isAuthRoute) return null;
         return '/splash';
       }
 
+      if (authState is AuthPasswordRecoveryReady) {
+        return location == '/reset-password' ? null : '/reset-password';
+      }
+
+      if (authState is AuthPasswordResetEmailSent) {
+        if (isAuthRoute) return null;
+        return '/login';
+      }
+
       if (authState is AuthAuthenticated) {
+        if (!authState.user.migrated) {
+          if (location == '/migrate') return null;
+          return '/migrate';
+        }
         if (authState.user.guide == null) {
           return location == '/onboarding' ? null : '/onboarding';
         }
@@ -127,11 +179,19 @@ class AppRouter {
         return null;
       }
 
+      if (authState is AuthNeedsMigration) {
+        if (location == '/migrate') return null;
+        return '/migrate';
+      }
+
       if (authState is AuthUnauthenticated) {
         return isAuthRoute && location != '/splash' ? null : '/login';
       }
 
       if (authState is AuthError) {
+        if (location == '/migrate') return null;
+        if (location == '/forgot-password') return null;
+        if (location == '/reset-password') return null;
         if (isAppRoute) return null;
         if (isAuthRoute && location != '/splash') return null;
         return '/login';

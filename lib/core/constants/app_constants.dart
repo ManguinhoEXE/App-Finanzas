@@ -11,6 +11,9 @@
   static const String salaryKey = 'salary';
   static const String salaryTypeKey = 'salary_type';
   static const String accumulatedBalanceKey = 'accumulated_balance';
+  static const String migratedKey = 'migrated';
+  static const String authUserIdKey = 'auth_user_id';
+  static const String emailKey = 'email';
 
   // Routes
   static const String loginRoute = '/login';
@@ -18,6 +21,9 @@
   static const String gastosRoute = '/gastos';
   static const String ingresosRoute = '/ingresos';
   static const String ahorrosRoute = '/ahorros';
+  static const String migrateRoute = '/migrate';
+  static const String forgotPasswordRoute = '/forgot-password';
+  static const String resetPasswordRoute = '/reset-password';
 
   // Animation Durations
   static const Duration shortDuration = Duration(milliseconds: 300);

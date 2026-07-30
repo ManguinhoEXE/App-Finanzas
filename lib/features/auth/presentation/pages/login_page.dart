@@ -27,6 +27,8 @@ class LoginPage extends StatelessWidget {
             } else {
               context.go('/gastos');
             }
+          } else if (state is AuthNeedsMigration) {
+            context.go('/migrate');
           } else if (state is AuthError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(

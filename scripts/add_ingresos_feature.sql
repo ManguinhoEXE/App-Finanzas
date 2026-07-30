@@ -30,7 +30,11 @@ CREATE TABLE IF NOT EXISTS incomes (
 CREATE INDEX IF NOT EXISTS idx_incomes_usuario_fecha ON incomes (usuario, fecha DESC, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_incomes_fecha ON incomes (fecha);
 
--- PASO 5: Actualizar sp_update_salary para aceptar salary_type
+-- PASO 5: Agregar columna email a users (para futura migracion a Supabase Auth)
+-- ============================================
+ALTER TABLE users ADD COLUMN IF NOT EXISTS email text UNIQUE;
+
+-- PASO 6: Actualizar sp_update_salary para aceptar salary_type
 -- ============================================
 CREATE OR REPLACE FUNCTION sp_update_salary(
   p_user_id bigint,
@@ -52,7 +56,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- PASO 6: SP para actualizar accumulated_balance
+-- PASO 7: SP para actualizar accumulated_balance
 -- ============================================
 CREATE OR REPLACE FUNCTION sp_update_accumulated_balance(
   p_user_id bigint,
@@ -72,20 +76,25 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- PASO 7: Actualizar sp_login para devolver salary_type y accumulated_balance
+-- PASO 8: Actualizar sp_login para verificar password y devolver nuevos campos
 -- ============================================
 CREATE OR REPLACE FUNCTION sp_login(p_name text, p_password text)
 RETURNS json AS $$
 DECLARE
   v_user record;
-  v_partner_id bigint;
-  v_partner_name text;
 BEGIN
   -- Buscar usuario por nombre
   SELECT * INTO v_user FROM users WHERE name = p_name;
-  
+
   IF NOT FOUND THEN
     RETURN json_build_object('error', 'Usuario no encontrado.');
+  END IF;
+
+  -- Verificar password con bcrypt
+  IF v_user.password_hash IS NOT NULL AND v_user.password_hash != '' THEN
+    IF crypt(p_password, v_user.password_hash) != v_user.password_hash THEN
+      RETURN json_build_object('error', 'Contrasena incorrecta.');
+    END IF;
   END IF;
 
   -- Devolver datos del usuario incluyendo nuevos campos
@@ -94,6 +103,9 @@ BEGIN
     'name', v_user.name,
     'friend_code', v_user.friend_code,
     'guide', v_user.guide,
+    'email', v_user.email,
+    'migrated', v_user.migrated,
+    'auth_user_id', v_user.auth_user_id::text,
     'salary', v_user.salary,
     'salary_type', v_user.salary_type,
     'accumulated_balance', v_user.accumulated_balance,
@@ -103,7 +115,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
--- PASO 8: Políticas RLS para incomes
+-- PASO 9: Políticas RLS para incomes
 -- ============================================
 ALTER TABLE incomes ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all on incomes" ON incomes FOR ALL USING (true);

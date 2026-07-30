@@ -8,6 +8,9 @@ class User extends Equatable {
   final double? salary;
   final String salaryType;
   final double accumulatedBalance;
+  final bool migrated;
+  final String? authUserId;
+  final String? email;
 
   const User({
     required this.id,
@@ -17,8 +20,11 @@ class User extends Equatable {
     this.salary,
     this.salaryType = 'fixed',
     this.accumulatedBalance = 0,
+    this.migrated = false,
+    this.authUserId,
+    this.email,
   });
 
   @override
-  List<Object?> get props => [id, name, friendCode, guide, salary, salaryType, accumulatedBalance];
+  List<Object?> get props => [id, name, friendCode, guide, salary, salaryType, accumulatedBalance, migrated, authUserId, email];
 }

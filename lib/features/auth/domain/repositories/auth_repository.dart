@@ -6,9 +6,15 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> signUp({
     required String name,
     required String password,
+    required String email,
   });
 
-  Future<Either<Failure, User>> signIn({
+  Future<Either<Failure, User>> signInWithSupabase({
+    required String email,
+    required String password,
+  });
+
+  Future<Either<Failure, User>> signInLegacy({
     required String name,
     required String password,
   });
@@ -24,4 +30,15 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> updateSalary(double salary, String salaryType);
 
   Future<Either<Failure, void>> updateAccumulatedBalance(double balance);
+
+  Future<Either<Failure, Map<String, dynamic>>> migrateUser({
+    required int userId,
+    required String password,
+    required String email,
+  });
+
+  Future<Either<Failure, void>> syncPasswordByEmail({
+    required String email,
+    required String newPassword,
+  });
 }

@@ -27,18 +27,23 @@ void setupDependencies() {
   );
   getIt.registerLazySingleton(() => SignUpUseCase(getIt()));
   getIt.registerLazySingleton(() => SignInUseCase(getIt()));
+  getIt.registerLazySingleton(() => SignInLegacyUseCase(getIt()));
   getIt.registerLazySingleton(() => AddPartnerUseCase(getIt()));
   getIt.registerLazySingleton(() => RemovePartnerUseCase(getIt()));
   getIt.registerLazySingleton(() => CompleteGuideUseCase(getIt()));
   getIt.registerLazySingleton(() => UpdateSalaryUseCase(getIt()));
+  getIt.registerLazySingleton(() => MigrateUserUseCase(getIt()));
   getIt.registerFactory(
     () => AuthBloc(
       signUpUseCase: getIt(),
       signInUseCase: getIt(),
+      signInLegacyUseCase: getIt(),
       addPartnerUseCase: getIt(),
       removePartnerUseCase: getIt(),
       completeGuideUseCase: getIt(),
       updateSalaryUseCase: getIt(),
+      migrateUserUseCase: getIt(),
+      authRepository: getIt(),
       localStorage: getIt(),
     ),
   );

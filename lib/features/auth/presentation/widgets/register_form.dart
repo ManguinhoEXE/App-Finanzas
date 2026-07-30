@@ -21,6 +21,7 @@ class RegisterForm extends StatefulWidget {
 class _RegisterFormState extends State<RegisterForm> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _obscurePassword = true;
@@ -29,6 +30,7 @@ class _RegisterFormState extends State<RegisterForm> {
   @override
   void dispose() {
     _nameController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
@@ -40,6 +42,7 @@ class _RegisterFormState extends State<RegisterForm> {
             SignUpRequested(
               name: _nameController.text.trim(),
               password: _passwordController.text,
+              email: _emailController.text.trim(),
             ),
           );
     }
@@ -63,15 +66,17 @@ class _RegisterFormState extends State<RegisterForm> {
               const SizedBox(height: 48),
               AnimatedListItem(index: 2, child: _buildNameField(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 3, child: _buildPasswordField(palette, l10n)),
+              AnimatedListItem(index: 3, child: _buildEmailField(palette)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 4, child: _buildConfirmPasswordField(palette, l10n)),
+              AnimatedListItem(index: 4, child: _buildPasswordField(palette, l10n)),
+              const SizedBox(height: 24),
+              AnimatedListItem(index: 5, child: _buildConfirmPasswordField(palette, l10n)),
               const SizedBox(height: 40),
-              AnimatedListItem(index: 5, child: _buildRegisterButton(palette, l10n)),
+              AnimatedListItem(index: 6, child: _buildRegisterButton(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 6, child: _buildLoginLink(palette, l10n)),
+              AnimatedListItem(index: 7, child: _buildLoginLink(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 7, child: _buildFooter(palette)),
+              AnimatedListItem(index: 8, child: _buildFooter(palette)),
             ],
           ),
         ),
@@ -126,6 +131,25 @@ class _RegisterFormState extends State<RegisterForm> {
         }
         if (value.trim().length < 3) {
           return l10n.registerUsernameValidationMinLength;
+        }
+        return null;
+      },
+    );
+  }
+
+  Widget _buildEmailField(dynamic palette) {
+    return _buildInputField(
+      palette: palette,
+      controller: _emailController,
+      label: 'CORREO ELECTRONICO',
+      hint: 'ejemplo@correo.com',
+      icon: Icons.email_outlined,
+      validator: (value) {
+        if (value == null || value.trim().isEmpty) {
+          return 'Ingresa tu correo electronico';
+        }
+        if (!RegExp(r'^[^@]+@[^@]+\.[^@]+').hasMatch(value.trim())) {
+          return 'Ingresa un correo valido';
         }
         return null;
       },

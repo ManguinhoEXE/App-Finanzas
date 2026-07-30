@@ -52,3 +52,20 @@ class AuthPartnerLinked extends AuthState {
   @override
   List<Object?> get props => [partnerName];
 }
+
+class AuthNeedsMigration extends AuthState {
+  final User user;
+
+  const AuthNeedsMigration({required this.user});
+
+  @override
+  List<Object?> get props => [user];
+}
+
+class AuthPasswordResetEmailSent extends AuthState {
+  const AuthPasswordResetEmailSent();
+}
+
+class AuthPasswordRecoveryReady extends AuthState {
+  const AuthPasswordRecoveryReady();
+}

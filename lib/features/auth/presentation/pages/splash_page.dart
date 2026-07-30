@@ -94,18 +94,16 @@ class _SplashPageState extends State<SplashPage>
     return Scaffold(
       backgroundColor: palette.background,
       body: Stack(
-        alignment: Alignment.center,
         children: [
-          _buildAmbientGlow(palette),
+          Center(child: _buildAmbientGlow(palette)),
+          Center(child: _buildHero(palette)),
           SafeArea(
-            child: Column(
-              children: [
-                const Spacer(),
-                _buildHero(palette),
-                const Spacer(),
-                _buildFooter(palette),
-                const SizedBox(height: 48),
-              ],
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: 48),
+                child: _buildFooter(palette),
+              ),
             ),
           ),
         ],

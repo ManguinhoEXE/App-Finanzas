@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
@@ -20,25 +21,35 @@ class LoginForm extends StatefulWidget {
 
 class _LoginFormState extends State<LoginForm> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _loginController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _loginController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
   void _onLogin() {
     if (_formKey.currentState!.validate()) {
-      context.read<AuthBloc>().add(
-            SignInRequested(
-              name: _nameController.text.trim(),
-              password: _passwordController.text,
-            ),
-          );
+      final input = _loginController.text.trim();
+      if (input.contains('@')) {
+        context.read<AuthBloc>().add(
+              SignInRequested(
+                email: input,
+                password: _passwordController.text,
+              ),
+            );
+      } else {
+        context.read<AuthBloc>().add(
+              SignInWithNameRequested(
+                name: input,
+                password: _passwordController.text,
+              ),
+            );
+      }
     }
   }
 
@@ -58,17 +69,22 @@ class _LoginFormState extends State<LoginForm> {
               const SizedBox(height: 40),
               AnimatedListItem(index: 1, child: _buildHeader(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 2, child: _buildNameField(palette, l10n)),
+              AnimatedListItem(
+                index: 2,
+                child: _buildLoginField(palette, l10n),
+              ),
               const SizedBox(height: 24),
               AnimatedListItem(index: 3, child: _buildPasswordField(palette, l10n)),
-              const SizedBox(height: 40),
-              AnimatedListItem(index: 4, child: _buildLoginButton(palette, l10n)),
+              const SizedBox(height: 8),
+              AnimatedListItem(index: 4, child: _buildForgotPasswordLink(palette)),
+              const SizedBox(height: 28),
+              AnimatedListItem(index: 5, child: _buildLoginButton(palette, l10n)),
               const SizedBox(height: 24),
-              AnimatedListItem(index: 5, child: _buildRegisterLink(palette, l10n)),
+              AnimatedListItem(index: 6, child: _buildRegisterLink(palette, l10n)),
               const SizedBox(height: 48),
-              AnimatedListItem(index: 6, child: _buildSecurityHint(palette, l10n)),
+              AnimatedListItem(index: 7, child: _buildSecurityHint(palette, l10n)),
               const SizedBox(height: 32),
-              AnimatedListItem(index: 7, child: _buildFooter(palette)),
+              AnimatedListItem(index: 8, child: _buildFooter(palette)),
             ],
           ),
         ),
@@ -110,16 +126,16 @@ class _LoginFormState extends State<LoginForm> {
     );
   }
 
-  Widget _buildNameField(dynamic palette, AppLocalizations l10n) {
+  Widget _buildLoginField(dynamic palette, AppLocalizations l10n) {
     return _buildInputField(
       palette: palette,
-      controller: _nameController,
-      label: l10n.loginUsernameLabel,
-      hint: l10n.loginUsernameHint,
+      controller: _loginController,
+      label: 'USUARIO O CORREO ELECTRONICO',
+      hint: 'nombreusuario@ejemplo.com',
       icon: Icons.person_outline,
       validator: (value) {
         if (value == null || value.trim().isEmpty) {
-          return l10n.loginUsernameValidationEmpty;
+          return 'Ingresa tu usuario o correo';
         }
         return null;
       },
@@ -221,6 +237,23 @@ class _LoginFormState extends State<LoginForm> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildForgotPasswordLink(dynamic palette) {
+    return Align(
+      alignment: Alignment.centerRight,
+      child: GestureDetector(
+        onTap: () => context.push('/forgot-password'),
+        child: Text(
+          '¿Olvidaste tu contraseña?',
+          style: GoogleFonts.dmSans(
+            fontSize: 12,
+            color: palette.gold.withValues(alpha: 0.8),
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+      ),
     );
   }
 

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
 import 'app_palettes.dart';
 import 'color_palette.dart';
 import '../../app/di/dependency_injection.dart';
